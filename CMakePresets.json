@@ -70,6 +70,13 @@
       }
     },
     {
+      "name": "relwithdebinfo",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
       "name": "release",
       "hidden": true,
       "cacheVariables": {
@@ -126,5 +133,30 @@
       "displayName": "ARM64 Debug",
       "inherits": [ "default", "ARM64", "debug" ]
     },
+    {
+      "name": "x64-relwithdebinfo",
+      "displayName": "x64 RelWithDebInfo",
+      "inherits": [ "default", "x64", "relwithdebinfo" ]
+    },
+    {
+      "name": "x86-relwithdebinfo",
+      "displayName": "x86 RelWithDebInfo",
+      "inherits": [ "default", "x86", "relwithdebinfo" ]
+    },
+    {
+      "name": "Win32-relwithdebinfo",
+      "displayName": "Win32 RelWithDebInfo",
+      "inherits": [ "default", "Win32", "relwithdebinfo" ]
+    },
+    {
+      "name": "ARM-relwithdebinfo",
+      "displayName": "ARM RelWithDebInfo",
+      "inherits": [ "default", "ARM", "relwithdebinfo" ]
+    },
+    {
+      "name": "ARM64-relwithdebinfo",
+      "displayName": "ARM64 RelWithDebInfo",
+      "inherits": [ "default", "ARM64", "relwithdebinfo" ]
+    }
   ]
 }

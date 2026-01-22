@@ -48,7 +48,7 @@ KCPP::HitTestResult KCPP::LCDStyle::LCDStyle::hitTest(SDL_Window *window, const 
 	else if (cursorPos->x <= (KCPP::LCDStyle::Font::width * 2 + 2) * lastContentScale)
 		return KCPP::HitTestResult::Menu;
 	else
-		return KCPP::HitTestResult::StylePassthrough;
+				return KCPP::HitTestResult::StylePassthrough;
 }
 
 bool KCPP::LCDStyle::LCDStyle::processEvent(SDL_Event &event) {

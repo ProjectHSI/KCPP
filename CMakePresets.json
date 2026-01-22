@@ -1,0 +1,130 @@
+﻿{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": false,
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {},
+      "environment": {
+        "VERBOSE": "true"
+      }
+    },
+    {
+      "name": "x64",
+      "hidden": true,
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "x86",
+      "hidden": true,
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "Win32",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "architecture": {
+        "value": "Win32",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ARM",
+      "hidden": true,
+      "architecture": {
+        "value": "ARM",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "ARM64",
+      "hidden": true,
+      "architecture": {
+        "value": "ARM64",
+        "strategy": "external"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "inherits": [ "default", "x64", "release" ]
+    },
+    {
+      "name": "x86-release",
+      "displayName": "x86 Release",
+      "inherits": [ "default", "x86", "release" ]
+    },
+    {
+      "name": "Win32-release",
+      "displayName": "Win32 Debug",
+      "inherits": [ "default", "Win32", "release" ]
+    },
+    {
+      "name": "ARM-release",
+      "displayName": "ARM Release",
+      "inherits": [ "default", "ARM", "release" ]
+    },
+    {
+      "name": "ARM64-release",
+      "displayName": "ARM64 Release",
+      "inherits": [ "default", "ARM64", "release" ]
+    },
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "inherits": [ "default", "x64", "debug" ]
+    },
+    {
+      "name": "x86-debug",
+      "displayName": "x86 Debug",
+      "inherits": [ "default", "x86", "debug" ]
+    },
+    {
+      "name": "Win32-debug",
+      "displayName": "Win32 Debug",
+      "inherits": [ "default", "Win32", "debug" ]
+    },
+    {
+      "name": "ARM-debug",
+      "displayName": "ARM Debug",
+      "inherits": [ "default", "ARM", "debug" ]
+    },
+    {
+      "name": "ARM64-debug",
+      "displayName": "ARM64 Debug",
+      "inherits": [ "default", "ARM64", "debug" ]
+    },
+  ]
+}

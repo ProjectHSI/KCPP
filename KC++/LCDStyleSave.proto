@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package KCPP.LCDStyle;
+
+message LCDColour3 {
+	double r = 1;
+	double g = 2;
+	double b = 3;
+}
+
+message LCDColour4 {
+	double r = 1;
+	double g = 2;
+	double b = 3;
+	double a = 4;
+}
+
+enum LCDUserNameType {
+	UserName = 0;
+	DisplayName = 1;
+}
+
+message LCDStyleSave {
+	LCDColour3 activeColour = 1;
+	LCDColour4 inactiveColour = 2;
+	LCDColour4 bgColour = 3;
+	oneof user_name {
+		string user_name_text = 4;
+		LCDUserNameType user_name_policy = 5;
+	}
+}

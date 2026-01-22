@@ -1,0 +1,219 @@
+﻿// KC++.cpp : Defines the entry point for the application.
+//
+
+#include "KC++.h"
+#include <SDL3/SDL.h>
+#include <numbers>
+#include "Style.h"
+#include "InputChecker.h"
+#include "LCDStyle.h"
+#include "Menu.h"
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+#include "Styles.h"
+#include <KC++Save.pb.h>
+#include "Save.h"
+
+KCPP::Style *KCPP::currentStyle;
+
+SDL_HitTestResult hitTest(SDL_Window *window, const SDL_Point *point, void *data) {
+	if (KCPP::currentStyle != nullptr) {
+		switch (KCPP::currentStyle->hitTest(window, point)) {
+			case KCPP::HitTestResult::Menu:
+				return SDL_HITTEST_NORMAL;
+			case KCPP::HitTestResult::StylePassthrough:
+				return SDL_HITTEST_NORMAL;
+			case KCPP::HitTestResult::None:
+			default:
+				return SDL_HITTEST_DRAGGABLE;
+		}
+	} else {
+		return SDL_HITTEST_DRAGGABLE;
+	}
+}
+
+SDL_Window *window;
+SDL_Renderer *renderer;
+
+KCPP::CounterType inputCounter = 0;
+bool renderNeeded = false;
+
+void KCPP::setCounter(KCPP::CounterType newCounter) {
+	inputCounter = newCounter;
+	renderNeeded = true;
+}
+
+KCPP::CounterType KCPP::getCounter() {
+	return inputCounter;
+}
+
+void iterate(bool fromMainLoop) {
+	//std::cout << "iter" << '\n';
+
+	if (fromMainLoop)
+		KCPP::Menu::menuIterate();
+
+	//inputCounter += 0.000001;
+	//inputCounter += 0.001;					   
+	
+
+	if (KCPP::InputChecker::checkInput()) {
+		KCPP::CounterType newCount = KCPP::InputChecker::newInputCount();
+		KCPP::InputChecker::clear();
+
+		if (inputCounter <= KCPP::calculateMaximumCounterAllowingForPrecision() - newCount) {
+			inputCounter += newCount;
+		} else {
+			inputCounter = KCPP::calculateMaximumCounterAllowingForPrecision();
+		}
+
+		renderNeeded = true;
+	}
+
+	//inputCounter = inputCounter >= KCPP::calculateMaximumCounterAllowingForPrecision()
+		//? KCPP::calculateMaximumCounterAllowingForPrecision()
+		//: inputCounter;
+
+	if (KCPP::currentStyle != nullptr) {
+		if (KCPP::currentStyle->sizeChangeNeeded(window)) {
+			SDL_SetWindowSize(window,
+							  KCPP::currentStyle->getSize(window)[0],
+							  KCPP::currentStyle->getSize(window)[1]
+			);
+			renderNeeded = true;
+		}
+
+		if (renderNeeded || KCPP::currentStyle->renderNow()) {
+			KCPP::currentStyle->render(renderer, inputCounter);
+			//std::cout << inputCounter << '\n';
+		}
+
+		SDL_RenderPresent(renderer);
+		renderNeeded = false;
+	}
+}
+
+bool menuOpen = false;
+
+static void toggleMenu() {
+	if (menuOpen) {
+		menuOpen = false;
+		KCPP::Menu::closeMenu();
+	} else {
+		menuOpen = true;
+		KCPP::Menu::openMenu();
+	}
+}
+
+static bool SDLCALL eventWatch(void *userdata, SDL_Event *event) {
+	if (event->type == SDL_EVENT_WINDOW_EXPOSED || (menuOpen && event->type == SDL_EVENT_WINDOW_MOVED)) {
+		iterate(true);
+		//std::cout << "event watch iter" << '\n';
+	} else {
+		//std::cout << event->type << '\n';
+	}
+
+	return true;
+}
+
+int main() {
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+#if defined(_WIN32) && defined(NDEBUG)
+	if (!FreeConsole())
+		std::cout << "FREECONSOLE " << GetLastError() << '\n';
+#endif
+
+	KCPP::currentStyle = KCPP::Styles::availableStyles->begin()->second.get();
+
+	KCPP::UsernameFinder::refreshCachedUserNames();
+
+	SDL_Init(SDL_INIT_VIDEO);
+
+	KCPP::InputChecker::init();
+
+	window = SDL_CreateWindow("KC++", 1, 1, SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_TRANSPARENT | SDL_WINDOW_UTILITY | SDL_WINDOW_BORDERLESS);
+
+	if (!window) {
+		std::cout << "STOP! window not init; " << SDL_GetError() << '\n';
+		std::terminate();
+	}
+
+	renderer = SDL_CreateRenderer(window, nullptr);
+
+	if (!renderer) {
+		std::cout << "STOP! renderer not init; " << SDL_GetError() << '\n';
+		std::terminate();
+	}
+
+	if (!SDL_SetRenderVSync(renderer, 2)) {
+		std::cout << "No adaptive vsync support\n";
+		if (!SDL_SetRenderVSync(renderer, 1)) {
+			std::cout << "No vsync support\n";
+		}
+	}
+
+	KCPP::Menu::menuInit();
+
+	KCPP::Save::load();
+
+	KCPP::currentStyle->init(renderer);
+	KCPP::currentStyle->resetRenderer(renderer);
+
+	bool continueRunning = true;
+
+	SDL_SetWindowHitTest(window, hitTest, nullptr);
+	SDL_AddEventWatch(eventWatch, nullptr);
+
+	while (continueRunning) {
+		SDL_Event event {};
+		while (SDL_PollEvent(&event)) {
+			if (!KCPP::Menu::menuEvent(event)) {
+				continue;
+			}
+
+			if (event.type == SDL_EVENT_QUIT) {
+				continueRunning = false;
+			} else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
+				if (event.window.windowID == SDL_GetWindowID(window)) {
+					continueRunning = false;
+				} else {
+					toggleMenu();
+				}
+			} else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
+				if (KCPP::currentStyle != nullptr) {
+					SDL_Point eventCoordinatesAsPoint {event.button.x, event.button.y};
+
+					if (KCPP::currentStyle->hitTest(window, &eventCoordinatesAsPoint) == KCPP::HitTestResult::Menu) {
+						toggleMenu();
+					} else if (KCPP::currentStyle->hitTest(window, &eventCoordinatesAsPoint) == KCPP::HitTestResult::StylePassthrough) {
+						KCPP::currentStyle->processEvent(event);
+					}
+				}
+			} else {
+				//std::cout << event.type << '\n';
+			}
+		}
+
+		iterate(true);
+	}
+
+	//SDL_Renderer *renderer = SDL_CreateRenderer();
+
+	KCPP::InputChecker::quit();
+
+	KCPP::Save::save();
+
+	KCPP::Menu::menuQuit();
+
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+
+	SDL_Quit();
+
+	google::protobuf::ShutdownProtobufLibrary();
+
+	return 0;
+}

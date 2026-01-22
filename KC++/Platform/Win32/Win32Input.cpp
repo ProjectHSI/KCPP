@@ -1,0 +1,193 @@
+#include "../../InputChecker.h"
+
+#include <atomic>
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <WinUser.h>
+#pragma comment( lib, "user32.lib") 
+#pragma comment( lib, "gdi32.lib")
+
+#include <iostream>
+#include <thread>
+#include <unordered_set>
+#include <bitset>
+
+std::atomic_flag receivedInput = ATOMIC_FLAG_INIT;
+std::atomic < KCPP::CounterType > inputCounters {};
+
+std::unordered_set < DWORD > pressedKeys {};
+
+#define LL_HOOKS
+
+LRESULT kbHookProc(int code, WPARAM wParam, LPARAM lParam) {
+	PKBDLLHOOKSTRUCT lParamStruct = reinterpret_cast < PKBDLLHOOKSTRUCT >(lParam);
+
+	if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && !pressedKeys.contains(lParamStruct->scanCode)) {
+		KCPP::InputChecker::safeAddToInputCounter(inputCounters, KCPP::InputChecker::keyReward);
+		receivedInput.test_and_set();
+
+		pressedKeys.insert(reinterpret_cast < PKBDLLHOOKSTRUCT >(lParam)->scanCode);
+	} else if (wParam == WM_KEYUP || wParam == WM_SYSKEYUP) {
+		pressedKeys.erase(reinterpret_cast < PKBDLLHOOKSTRUCT >(lParam)->scanCode);
+	}
+
+	return CallNextHookEx(nullptr, code, wParam, lParam);
+}
+
+POINT lastMousePos = {-1, -1};
+unsigned short xButtonsPressed = 0;
+
+LRESULT mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
+	PMSLLHOOKSTRUCT lParamStruct = reinterpret_cast < PMSLLHOOKSTRUCT >(lParam);
+
+	if (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN || wParam == WM_MBUTTONDOWN) {
+		KCPP::InputChecker::safeAddToInputCounter(inputCounters, KCPP::InputChecker::mouseButtonReward);
+		receivedInput.test_and_set();
+	} else if (wParam == WM_MOUSEMOVE) {
+		if (lastMousePos.x != -1 && lastMousePos.y != -1) {
+			POINT distance = {fabsf(lParamStruct->pt.x - lastMousePos.x), fabsf(lParamStruct->pt.y - lastMousePos.y)};
+
+			KCPP::InputChecker::safeAddToInputCounter(inputCounters, sqrtf(powf(distance.x, 2) + powf(distance.y, 2)) * KCPP::InputChecker::mouseMotionReward);
+			receivedInput.test_and_set();
+		}
+
+		lastMousePos = lParamStruct->pt;
+	} else if (unsigned short xButton = (lParamStruct->mouseData & 0xFFFF0000) >> 16; wParam == WM_XBUTTONDOWN && !(xButtonsPressed & xButton)) {
+		xButtonsPressed |= xButton;
+		KCPP::InputChecker::safeAddToInputCounter(inputCounters, KCPP::InputChecker::mouseButtonReward);
+		receivedInput.test_and_set();
+	} else if (unsigned short xButton = (lParamStruct->mouseData & 0xFFFF0000) >> 16; wParam == WM_XBUTTONUP) {
+		xButtonsPressed &= ~xButton;
+	} else if (wParam == WM_MOUSEWHEEL || wParam == WM_MOUSEHWHEEL) {
+		signed short wheelDelta = ((lParamStruct->mouseData & 0xFFFF0000) >> 16);
+		wheelDelta = abs(wheelDelta); // convert to unsigned
+
+		double wheelDeltaDouble = wheelDelta / WHEEL_DELTA;
+
+		KCPP::InputChecker::safeAddToInputCounter(inputCounters, wheelDeltaDouble * KCPP::InputChecker::mouseWheelReward);
+		receivedInput.test_and_set();
+	} else {
+		//std::cout << wParam << std::endl;
+		//std::cout << std::bitset < 32 >(lParamStruct->mouseData) << std::endl;
+	}
+
+	return CallNextHookEx(nullptr, code, wParam, lParam);
+}
+
+HHOOK keyboardHook = nullptr;
+HHOOK mouseHook = nullptr;
+
+std::atomic < uint8_t > enabledInputTypes = 0;
+
+std::atomic_flag continueWin32Thread = ATOMIC_FLAG_INIT;
+std::thread win32InputThread;
+
+static void enableWin32Kb() {
+	keyboardHook = SetWindowsHookExA(WH_KEYBOARD_LL, kbHookProc, nullptr, 0);
+
+	if (keyboardHook == NULL) {
+		std::cout << GetLastError() << '\n';
+	} else {
+		enabledInputTypes |= static_cast < uint8_t >(KCPP::InputChecker::InputType::Keyboard);
+	}
+}
+
+static void enableWin32Mouse() {
+	mouseHook = SetWindowsHookExA(WH_MOUSE_LL, mouseHookProc, nullptr, 0);
+
+	if (mouseHook == NULL) {
+		std::cout << GetLastError() << '\n';
+	} else {
+		enabledInputTypes |= static_cast < uint8_t >(KCPP::InputChecker::InputType::Mouse);
+	}
+}
+
+static void disableWin32Kb() {
+	if (keyboardHook != NULL) {
+		UnhookWindowsHookEx(keyboardHook);
+		keyboardHook = NULL;
+		enabledInputTypes &= ~static_cast < uint8_t >(KCPP::InputChecker::InputType::Keyboard);
+	}
+}
+
+static void disableWin32Mouse() {
+	if (mouseHook != NULL) {
+		UnhookWindowsHookEx(mouseHook);
+		mouseHook = NULL;
+		enabledInputTypes &= ~static_cast < uint8_t >(KCPP::InputChecker::InputType::Mouse);
+	}
+}
+
+static void updateInputTypes() {
+	uint8_t enabledInputTypesLocal = enabledInputTypes.load();
+	if (enabledInputTypesLocal & static_cast < uint8_t >(KCPP::InputChecker::InputType::Keyboard) && !keyboardHook) {
+		keyboardHook = SetWindowsHookExA(WH_KEYBOARD_LL, kbHookProc, nullptr, 0);
+		if (!keyboardHook) {
+			std::cout << "KEYBOARD HOOK FAIL! " << GetLastError() << '\n';
+			enabledInputTypes ^= static_cast < uint8_t >(KCPP::InputChecker::InputType::Keyboard);
+		}
+	} else if (!(enabledInputTypesLocal & static_cast < uint8_t >(KCPP::InputChecker::InputType::Keyboard)) && keyboardHook) {
+		UnhookWindowsHookEx(keyboardHook);
+		keyboardHook = nullptr;
+	}
+	if (enabledInputTypesLocal & static_cast < uint8_t >(KCPP::InputChecker::InputType::Mouse) && !mouseHook) {
+		mouseHook = SetWindowsHookExA(WH_MOUSE_LL, mouseHookProc, nullptr, 0);
+		if (!mouseHook) {
+			std::cout << "MOUSE HOOK FAIL! " << GetLastError() << '\n';
+			enabledInputTypes ^= static_cast < uint8_t >(KCPP::InputChecker::InputType::Mouse);
+		}
+	} else if (!(enabledInputTypesLocal & static_cast < uint8_t >(KCPP::InputChecker::InputType::Mouse)) && mouseHook) {
+		UnhookWindowsHookEx(mouseHook);
+		mouseHook = nullptr;
+	}
+}
+
+static void win32InputThreadFunc() {
+	while (continueWin32Thread.test_and_set()) {
+		MSG msg;
+		updateInputTypes();
+		while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessageA(&msg);
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+	updateInputTypes();
+}
+
+void KCPP::InputChecker::init() {;
+	continueWin32Thread.test_and_set();
+	win32InputThread = std::thread(win32InputThreadFunc);
+}
+
+bool KCPP::InputChecker::getInputEnabled(InputType type) {
+	return enabledInputTypes & static_cast < uint8_t >(type);
+}
+
+void KCPP::InputChecker::setInputEnabled(InputType type, bool enabled) {
+	if (enabled) {
+		enabledInputTypes |= static_cast < uint8_t >(type);
+	} else {
+		enabledInputTypes &= ~static_cast < uint8_t >(type);
+	}
+}
+
+void KCPP::InputChecker::clear() {
+	inputCounters.store(0);
+	receivedInput.clear();
+}
+
+bool KCPP::InputChecker::checkInput() {
+	return receivedInput.test();
+}
+																	 
+KCPP::CounterType KCPP::InputChecker::newInputCount() {
+	return inputCounters.load();
+}
+
+void KCPP::InputChecker::quit() {
+	//enabledInputTypes.store(0);
+	continueWin32Thread.clear();
+	win32InputThread.join();
+}

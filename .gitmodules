@@ -1,0 +1,12 @@
+[submodule "ext/sdl"]
+	path = ext/sdl
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "ext/imgui"]
+	path = ext/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "ext/protobuf"]
+	path = ext/protobuf
+	url = https://github.com/protocolbuffers/protobuf.git
+[submodule "ext/abseil"]
+	path = ext/abseil
+	url = https://github.com/abseil/abseil-cpp.git

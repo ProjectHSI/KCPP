@@ -32,7 +32,7 @@ std::string_view KCPP::LCDStyle::LCDStyle::getDisplayName() {
 
 
 void KCPP::LCDStyle::LCDStyle::prestige() {
-	queuedTickerAnimations.push_back({std::format("PRESTIGE!!! PRESTIVE LEVEL {}, KEEP GOING!", KCPP::calculatePrestigeString(KCPP::getPrestige())), std::numeric_limits < decltype (TickerAnimation::startTime) >::max()});
+	queuedTickerAnimations.push_back({std::format("PRESTIGE!!! PRESTIGE LEVEL {}, KEEP GOING!", KCPP::calculatePrestigeString(KCPP::getPrestige())), std::numeric_limits < decltype (TickerAnimation::startTime) >::max()});
 }
 
 

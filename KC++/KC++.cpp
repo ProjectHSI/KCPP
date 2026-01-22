@@ -16,6 +16,9 @@
 #include <KC++Save.pb.h>
 #include "Save.h"
 
+#undef max
+#undef min
+
 KCPP::Style *KCPP::currentStyle;
 
 SDL_HitTestResult hitTest(SDL_Window *window, const SDL_Point *point, void *data) {
@@ -81,7 +84,7 @@ void iterate(bool fromMainLoop) {
 			inputCounter = KCPP::calculateMaximumCounterAllowingForPrecision();
 		}
 
-		if (inputCounter >= KCPP::getNextPrestigePoint(prestigeCounter)) {
+		if (prestigeCounter != std::numeric_limits < KCPP::PrestigeType >::max() && inputCounter >= KCPP::getNextPrestigePoint(prestigeCounter)) {
 			inputCounter -= KCPP::getNextPrestigePoint(prestigeCounter);
 			prestigeCounter++;
 			if (KCPP::currentStyle != nullptr)
@@ -182,7 +185,7 @@ int main() {
 
 	KCPP::Save::load();
 
-	inputCounter = KCPP::getNextPrestigePoint(prestigeCounter) - 1000000;
+	//inputCounter = KCPP::getNextPrestigePoint(prestigeCounter) - 10000000;
 
 	KCPP::currentStyle->init(renderer);
 	KCPP::currentStyle->resetRenderer(renderer);

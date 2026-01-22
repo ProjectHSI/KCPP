@@ -38,7 +38,7 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 
 KCPP::CounterType inputCounter = 0;
-bool renderNeeded = false;
+bool renderNeeded = true;
 
 void KCPP::setCounter(KCPP::CounterType newCounter) {
 	inputCounter = newCounter;
@@ -47,6 +47,18 @@ void KCPP::setCounter(KCPP::CounterType newCounter) {
 
 KCPP::CounterType KCPP::getCounter() {
 	return inputCounter;
+}
+
+
+KCPP::PrestigeType prestigeCounter = 0;
+
+void KCPP::setPrestige(KCPP::PrestigeType newPrestige) {
+	prestigeCounter = newPrestige;
+	renderNeeded = true;
+}
+
+KCPP::PrestigeType KCPP::getPrestige() {
+	return prestigeCounter;
 }
 
 void iterate(bool fromMainLoop) {
@@ -69,6 +81,13 @@ void iterate(bool fromMainLoop) {
 			inputCounter = KCPP::calculateMaximumCounterAllowingForPrecision();
 		}
 
+		if (inputCounter >= KCPP::getNextPrestigePoint(prestigeCounter)) {
+			inputCounter -= KCPP::getNextPrestigePoint(prestigeCounter);
+			prestigeCounter++;
+			if (KCPP::currentStyle != nullptr)
+				KCPP::currentStyle->prestige();
+		}
+
 		renderNeeded = true;
 	}
 
@@ -86,7 +105,7 @@ void iterate(bool fromMainLoop) {
 		}
 
 		if (renderNeeded || KCPP::currentStyle->renderNow()) {
-			KCPP::currentStyle->render(renderer, inputCounter);
+			KCPP::currentStyle->render(renderer, inputCounter, prestigeCounter);
 			//std::cout << inputCounter << '\n';
 		}
 
@@ -126,11 +145,15 @@ int main() {
 		std::cout << "FREECONSOLE " << GetLastError() << '\n';
 #endif
 
+	//std::cout << KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() << '\n';
+
 	KCPP::currentStyle = KCPP::Styles::availableStyles->begin()->second.get();
 
 	KCPP::UsernameFinder::refreshCachedUserNames();
 
 	SDL_Init(SDL_INIT_VIDEO);
+
+	SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1");
 
 	KCPP::InputChecker::init();
 
@@ -158,6 +181,8 @@ int main() {
 	KCPP::Menu::menuInit();
 
 	KCPP::Save::load();
+
+	inputCounter = KCPP::getNextPrestigePoint(prestigeCounter) - 1000000;
 
 	KCPP::currentStyle->init(renderer);
 	KCPP::currentStyle->resetRenderer(renderer);

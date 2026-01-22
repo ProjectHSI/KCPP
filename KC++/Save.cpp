@@ -10,6 +10,7 @@ void KCPP::Save::save() {
 	KCPP::Save::Save kcppProtoSave {};
 
 	kcppProtoSave.set_counter(KCPP::getCounter());
+	kcppProtoSave.set_prestige(KCPP::getPrestige());
 
 	kcppProtoSave.set_keyboardinput(KCPP::InputChecker::getInputEnabled(KCPP::InputChecker::InputType::Keyboard));
 	kcppProtoSave.set_mouseinput(KCPP::InputChecker::getInputEnabled(KCPP::InputChecker::InputType::Mouse));
@@ -40,6 +41,7 @@ void KCPP::Save::load() {
 	}
 
 	KCPP::setCounter(kcppProtoSave.counter());
+	KCPP::setPrestige(kcppProtoSave.prestige());
 
 	KCPP::InputChecker::setInputEnabled(KCPP::InputChecker::InputType::Keyboard, kcppProtoSave.keyboardinput());
 	KCPP::InputChecker::setInputEnabled(KCPP::InputChecker::InputType::Mouse, kcppProtoSave.mouseinput());

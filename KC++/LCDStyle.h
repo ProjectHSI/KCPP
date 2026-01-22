@@ -18,11 +18,12 @@ namespace KCPP {
 
 		class LCDStyle : public KCPP::Style {
 		private:
+			SDL_Surface *lcdTextureSurface = nullptr;
 			SDL_Texture *lcdTexture = nullptr;
-			SDL_Texture *lcdTextureInvert = nullptr;
+			//SDL_Texture *lcdTextureInvert = nullptr;
 
-			void renderGlyph(SDL_Renderer *renderer, SDL_Texture *texture, const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset);
-			void renderGlyphWithChar(SDL_Renderer *renderer, SDL_Texture *texture, char character, int xOffset, int yOffset);
+			void renderGlyph(SDL_Renderer *renderer, const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige);
+			void renderGlyphWithChar(SDL_Renderer *renderer, char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige);
 
 			struct TickerAnimation {
 				std::string text {};
@@ -62,6 +63,11 @@ namespace KCPP {
 
 		public:
 			virtual std::string_view getInternalName() override;
+			virtual std::string_view getDisplayName() override;
+
+
+			// Events
+			virtual void prestige() override;
 
 
 
@@ -78,7 +84,7 @@ namespace KCPP {
 			virtual bool sizeChangeNeeded(SDL_Window *window) override;
 			virtual std::array < int, 2 > getSize(SDL_Window *window) const override;
 
-			virtual void render(SDL_Renderer *renderer, KCPP::CounterType count) override;
+			virtual void render(SDL_Renderer *renderer, KCPP::CounterType count, KCPP::PrestigeType prestige) override;
 
 			virtual void quit(SDL_Renderer *renderer) override;
 

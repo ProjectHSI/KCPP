@@ -2,7 +2,8 @@ syntax = "proto3";
 package KCPP.Save;
 
 message Save {
-	uint32 counter = 1;
+	uint64 counter = 1;
+	uint32 prestige = 7; 
 	bool keyboardInput = 2;
 	bool mouseInput = 3;
 	bool controllerInput = 4;

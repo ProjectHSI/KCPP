@@ -16,6 +16,11 @@ namespace KCPP {
 	class Style {
 	public:
 		virtual std::string_view getInternalName() = 0;
+		virtual std::string_view getDisplayName() = 0;
+
+
+		// Events
+		virtual void prestige() = 0;
 
 
 
@@ -30,7 +35,7 @@ namespace KCPP {
 		virtual bool sizeChangeNeeded(SDL_Window *window) = 0;
 		virtual std::array < int, 2 > getSize(SDL_Window *window) const = 0;
 
-		virtual void render(SDL_Renderer *renderer, KCPP::CounterType count) = 0;
+		virtual void render(SDL_Renderer *renderer, KCPP::CounterType count, KCPP::PrestigeType prestige) = 0;
 
 		virtual void quit(SDL_Renderer *renderer) = 0;
 

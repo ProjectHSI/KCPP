@@ -9,4 +9,7 @@ message Save {
 	bool controllerInput = 4;
 	string current_style = 5;
 	map < string, bytes > style_settings = 6;
+
+	int32 window_x = 8;
+	int32 window_y = 9;
 };

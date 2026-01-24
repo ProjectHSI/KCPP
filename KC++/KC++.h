@@ -15,6 +15,8 @@ namespace KCPP {
 	KCPP::PrestigeType getPrestige(void);
 
 	bool isWindowShown(void);
+	std::pair < int, int > getWindowPosition(void);
+	void setWindowPosition(std::pair < int, int > windowPos);
 	void hideWindow();
 }
 

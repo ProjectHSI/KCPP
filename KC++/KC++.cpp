@@ -46,6 +46,8 @@ SDL_Tray *tray;
 SDL_TrayMenu *trayMenu;
 SDL_TrayEntry *trayToggleWindow;
 SDL_TrayEntry *trayRecenterWindow;
+SDL_TrayEntry *traySeparator;
+SDL_TrayEntry *trayQuit;
 
 ::std::size_t autoSaveCounter {};
 ::std::size_t autoSaveInterval = 60 * 1000; // 1 minute
@@ -58,10 +60,22 @@ bool localIsWindowShown = true;
 void KCPP::hideWindow() {
 	localIsWindowShown = false;
 	SDL_HideWindow(window);
+	SDL_SetTrayEntryEnabled(trayRecenterWindow, false);
 }
 
 bool KCPP::isWindowShown() {
 	return localIsWindowShown;
+}
+
+std::pair<int, int> KCPP::getWindowPosition(void) {
+	int x {};
+	int y {};
+	SDL_GetWindowPosition(window, &x, &y);
+	return {x, y};
+}
+
+void KCPP::setWindowPosition(std::pair<int, int> windowPos) {
+	SDL_SetWindowPosition(window, windowPos.first, windowPos.second);
 }
 
 void KCPP::setCounter(KCPP::CounterType newCounter) {
@@ -170,14 +184,22 @@ static void SDLCALL trayToggleWindowFunc(void *userdata, SDL_TrayEntry *entry) {
 	if (localIsWindowShown) {
 		SDL_HideWindow(window);
 		localIsWindowShown = false;
+		SDL_SetTrayEntryEnabled(trayRecenterWindow, false);
 	} else {
 		SDL_ShowWindow(window);
 		localIsWindowShown = true;
+		SDL_SetTrayEntryEnabled(trayRecenterWindow, true);
 	}
 }
 
 static void SDLCALL trayRecenterWindowFunc(void *userdata, SDL_TrayEntry *entry) {
 	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+}
+
+bool continueRunning = true;
+
+static void SDLCALL trayQuitFunc(void *userdata, SDL_TrayEntry *entry) {
+	continueRunning = false;
 }
 
 int main() {
@@ -226,6 +248,9 @@ int main() {
 	SDL_SetTrayEntryCallback(trayToggleWindow, trayToggleWindowFunc, nullptr);
 	trayRecenterWindow = SDL_InsertTrayEntryAt(trayMenu, -1, "Recenter Window", SDL_TRAYENTRY_BUTTON);
 	SDL_SetTrayEntryCallback(trayRecenterWindow, trayRecenterWindowFunc, nullptr);
+	traySeparator = SDL_InsertTrayEntryAt(trayMenu, -1, nullptr, SDL_TRAYENTRY_DISABLED);
+	trayQuit = SDL_InsertTrayEntryAt(trayMenu, -1, "Quit", SDL_TRAYENTRY_BUTTON);
+	SDL_SetTrayEntryCallback(trayQuit, trayQuitFunc, nullptr);
 
 
 
@@ -244,8 +269,6 @@ int main() {
 
 	KCPP::currentStyle->init(renderer);
 	KCPP::currentStyle->resetRenderer(renderer);
-
-	bool continueRunning = true;
 
 	SDL_SetWindowHitTest(window, hitTest, nullptr);
 	SDL_AddEventWatch(eventWatch, nullptr);

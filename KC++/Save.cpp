@@ -24,6 +24,11 @@ void KCPP::Save::save() {
 	for (auto &i : *(KCPP::Styles::availableStyles.get())) {
 		styleSettings->operator[](i.first) = i.second->generateSettings();
 	}
+
+	const auto windowPos = KCPP::getWindowPosition();
+
+	kcppProtoSave.set_window_x(windowPos.first);
+	kcppProtoSave.set_window_y(windowPos.second);
 	
 	{
 		std::ofstream saveStream("kc++save.pbbin", std::ios::trunc | std::ios::binary);
@@ -55,4 +60,6 @@ void KCPP::Save::load() {
 			KCPP::Styles::availableStyles->operator[](i.first)->parseSettings(i.second);
 		}
 	}
+
+	KCPP::setWindowPosition({kcppProtoSave.window_x(), kcppProtoSave.window_y()});
 }

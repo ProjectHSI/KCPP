@@ -6,12 +6,19 @@
 #include <imgui_impl_sdlrenderer3.h>
 #include "InputChecker.h"
 #include "KC++.h"
+#include <KC++.png.h>
 
 SDL_Window *menuWindow = nullptr;
 SDL_Renderer *menuRenderer = nullptr;
 
 void KCPP::Menu::menuInit() {
+	SDL_Surface *kcppPngSurface = SDL_LoadPNG_IO(SDL_IOFromConstMem(kcppPng.data(), kcppPng.size()), true);
+
 	menuWindow = SDL_CreateWindow("KC++ Menu", 400, 300, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
+	SDL_SetWindowIcon(menuWindow, kcppPngSurface);
+
+	SDL_DestroySurface(kcppPngSurface);
+
 	menuRenderer = SDL_CreateRenderer(menuWindow, nullptr);
 
 	IMGUI_CHECKVERSION();
@@ -46,10 +53,17 @@ void KCPP::Menu::menuIterate() {
 	ImGui::NewFrame();
 
 	bool openPointsReset = false;
+	bool trayIconShowNotif = false;
 
 	ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
 	ImGui::SetNextWindowPos({0, 0}, ImGuiCond_Always);
 	if (ImGui::Begin("KC++ Configuration", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoMove)) {
+		ImGui::BeginDisabled(!KCPP::isWindowShown());
+		if (ImGui::Button("Hide KC++")) {
+			trayIconShowNotif = true;
+			KCPP::hideWindow();
+		}
+		ImGui::EndDisabled();
 		bool kbEnabled = KCPP::InputChecker::getInputEnabled(KCPP::InputChecker::InputType::Keyboard);
 		bool mouseEnabled = KCPP::InputChecker::getInputEnabled(KCPP::InputChecker::InputType::Mouse);
 		bool controllerEnabled = KCPP::InputChecker::getInputEnabled(KCPP::InputChecker::InputType::Controller);
@@ -94,6 +108,16 @@ void KCPP::Menu::menuIterate() {
 		if (ImGui::Button("No")) {
 			ImGui::CloseCurrentPopup();
 		}
+		ImGui::EndPopup();
+	}
+
+	if (trayIconShowNotif)
+		ImGui::OpenPopup("Tray Icon");
+
+	if (ImGui::BeginPopupModal("Tray Icon", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		ImGui::TextUnformatted("You can use the tray icon to show KC++ again.");
+		if (ImGui::Button("OK"))
+			ImGui::CloseCurrentPopup();
 		ImGui::EndPopup();
 	}
 

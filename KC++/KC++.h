@@ -13,6 +13,9 @@ namespace KCPP {
 	KCPP::CounterType getCounter(void);
 	void setPrestige(KCPP::PrestigeType newPrestige);
 	KCPP::PrestigeType getPrestige(void);
+
+	bool isWindowShown(void);
+	void hideWindow();
 }
 
 // TODO: Reference additional headers your program requires here.

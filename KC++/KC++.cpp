@@ -15,6 +15,7 @@
 #include "Styles.h"
 #include <KC++Save.pb.h>
 #include "Save.h"
+#include <KC++.png.h>
 
 #undef max
 #undef min
@@ -38,13 +39,30 @@ SDL_HitTestResult hitTest(SDL_Window *window, const SDL_Point *point, void *data
 }
 
 SDL_Window *window;
+SDL_Surface *kcppIcon;
 SDL_Renderer *renderer;
+
+SDL_Tray *tray;
+SDL_TrayMenu *trayMenu;
+SDL_TrayEntry *trayToggleWindow;
+SDL_TrayEntry *trayRecenterWindow;
 
 ::std::size_t autoSaveCounter {};
 ::std::size_t autoSaveInterval = 60 * 1000; // 1 minute
 
 KCPP::CounterType inputCounter = 0;
 bool renderNeeded = true;
+
+bool localIsWindowShown = true;
+
+void KCPP::hideWindow() {
+	localIsWindowShown = false;
+	SDL_HideWindow(window);
+}
+
+bool KCPP::isWindowShown() {
+	return localIsWindowShown;
+}
 
 void KCPP::setCounter(KCPP::CounterType newCounter) {
 	inputCounter = newCounter;
@@ -148,6 +166,20 @@ static bool SDLCALL eventWatch(void *userdata, SDL_Event *event) {
 	return true;
 }
 
+static void SDLCALL trayToggleWindowFunc(void *userdata, SDL_TrayEntry *entry) {
+	if (localIsWindowShown) {
+		SDL_HideWindow(window);
+		localIsWindowShown = false;
+	} else {
+		SDL_ShowWindow(window);
+		localIsWindowShown = true;
+	}
+}
+
+static void SDLCALL trayRecenterWindowFunc(void *userdata, SDL_TrayEntry *entry) {
+	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+}
+
 int main() {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -175,12 +207,27 @@ int main() {
 		std::terminate();
 	}
 
+	kcppIcon = SDL_LoadPNG_IO(SDL_IOFromConstMem(kcppPng.data(), kcppPng.size()), true);
+
+	SDL_SetWindowIcon(window, kcppIcon);
+
 	renderer = SDL_CreateRenderer(window, nullptr);
 
 	if (!renderer) {
 		std::cout << "STOP! renderer not init; " << SDL_GetError() << '\n';
 		std::terminate();
 	}
+
+
+
+	tray = SDL_CreateTray(kcppIcon, "KC++");
+	trayMenu = SDL_CreateTrayMenu(tray);
+	trayToggleWindow = SDL_InsertTrayEntryAt(trayMenu, -1, "Toggle Window", SDL_TRAYENTRY_BUTTON);
+	SDL_SetTrayEntryCallback(trayToggleWindow, trayToggleWindowFunc, nullptr);
+	trayRecenterWindow = SDL_InsertTrayEntryAt(trayMenu, -1, "Recenter Window", SDL_TRAYENTRY_BUTTON);
+	SDL_SetTrayEntryCallback(trayRecenterWindow, trayRecenterWindowFunc, nullptr);
+
+
 
 	if (!SDL_SetRenderVSync(renderer, 2)) {
 		std::cout << "No adaptive vsync support\n";
@@ -244,7 +291,10 @@ int main() {
 
 	KCPP::Menu::menuQuit();
 
+	SDL_DestroyTray(tray);
+
 	SDL_DestroyRenderer(renderer);
+	SDL_DestroySurface(kcppIcon);
 	SDL_DestroyWindow(window);
 
 	SDL_Quit();

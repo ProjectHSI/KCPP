@@ -40,6 +40,9 @@ SDL_HitTestResult hitTest(SDL_Window *window, const SDL_Point *point, void *data
 SDL_Window *window;
 SDL_Renderer *renderer;
 
+::std::size_t autoSaveCounter {};
+::std::size_t autoSaveInterval = 60 * 1000; // 1 minute
+
 KCPP::CounterType inputCounter = 0;
 bool renderNeeded = true;
 
@@ -69,6 +72,11 @@ void iterate(bool fromMainLoop) {
 
 	if (fromMainLoop)
 		KCPP::Menu::menuIterate();
+
+	if (autoSaveCounter < SDL_GetTicks() / autoSaveInterval) {
+		autoSaveCounter = SDL_GetTicks() / autoSaveInterval;
+		KCPP::Save::save();
+	}
 
 	//inputCounter += 0.000001;
 	//inputCounter += 0.001;					   

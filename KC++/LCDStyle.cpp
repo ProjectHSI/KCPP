@@ -353,8 +353,10 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	renderGlyphs(counterString, counterOffset, 1, count, prestige, activeColour, inactiveColour, counterMaxLength, counterTextAlignment);
 	renderGlyphs(prestigeString, prestigeOffset, 1, count, prestige, prestigeActiveColour, inactiveColour, prestigeCounterMaxLength, prestigeTextAlignment);
 
+	const ::std::size_t currentTouchTick = SDL_GetTicks();
+
 	while (!currentTouches.empty()) {
-		if (currentTouches.front().timeStamp + touchDuration < SDL_GetTicks()) {
+		if (currentTouches.front().timeStamp + touchDuration < currentTouchTick) {
 			currentTouches.pop_front();
 		} else {
 			break;
@@ -365,6 +367,9 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 		for (auto touchI = currentTouches.crbegin(); touchI != currentTouches.crend(); ++touchI) {
 			const auto &touch = *touchI;
 			constexpr size_t touchRadius = 16;
+
+			double timeMult = ((touch.timeStamp + touchDuration - currentTouchTick) / static_cast < double >(touchDuration));
+
 			for (std::size_t y = 0; y < getLcdTextureSize()[1]; y++) {
 				for (std::size_t x = 0; x < getLcdTextureSize()[0]; x++) {
 					double effectivePixelX = x + 0.5;
@@ -372,7 +377,6 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 					double dx = fabs(effectivePixelX - touch.x);
 					double dy = fabs(effectivePixelY - touch.y);
 					double distance = sqrtf(dx * dx + dy * dy);
-					double timeMult = ((touch.timeStamp + touchDuration - SDL_GetTicks()) / static_cast < double >(touchDuration));
 					double pixelAmount = (1 - (distance / touchRadius / timeMult));
 
 					float dR = activeColour[0] - pixel(lcdTextureSurface, x, y, PixelComponent::R);

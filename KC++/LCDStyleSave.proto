@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option optimize_for = LITE_RUNTIME;
+
 package KCPP.LCDStyle;
 
 message LCDColour3 {
@@ -20,12 +22,28 @@ enum LCDUserNameType {
 	DisplayName = 1;
 }
 
+enum LCDElementAlignment {
+	LEFT = 0;
+	RIGHT = 1;
+}
+
+enum LCDElementAttachment {
+	ATTACHED = 0;
+	DETACHED = 1;
+}
+
 message LCDStyleSave {
 	LCDColour3 activeColour = 1;
+	LCDColour3 prestige_active_colour = 10;
 	LCDColour4 inactiveColour = 2;
 	LCDColour4 bgColour = 3;
 	oneof user_name {
 		string user_name_text = 4;
 		LCDUserNameType user_name_policy = 5;
 	}
+	
+	LCDElementAlignment lcdGrabBarAlignment = 6;
+	LCDElementAttachment lcdGrabBarAttachment = 7;
+	LCDElementAlignment lcdPrestigeCounterAlignment = 8;
+	LCDElementAttachment lcdPrestigeCounterAttachment = 9;
 }

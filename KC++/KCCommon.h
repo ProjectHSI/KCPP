@@ -51,7 +51,7 @@ namespace KCPP {
 
 	constexpr std::size_t calculateGlyphsNeededForMaximumCounter() {
 		if (std::numeric_limits < KCPP::CounterType >::is_exact)
-			return std::numeric_limits < KCPP::CounterType >::digits10 + (fixedPoint != 0 ? 1 : 0);
+			return std::numeric_limits < KCPP::CounterType >::digits10 + 1 + (fixedPoint != 0 ? 1 : 0);
 
 		KCPP::CounterType maxCounter = calculateMaximumCounterAllowingForPrecision() / counterTypePrecisionWanted;
 		std::size_t digitsNeeded = 0;
@@ -63,7 +63,7 @@ namespace KCPP {
 	}
 
 	static std::string calculateCounterString(KCPP::CounterType counter) {
-		std::string counterString = std::format(std::numeric_limits < KCPP::CounterType >::is_exact ? "{:{}}" : "{:{}.{}f}", counter, KCPP::calculateGlyphsNeededForMaximumCounter() + 1, 6);
+		std::string counterString = std::format(std::numeric_limits < KCPP::CounterType >::is_exact ? "{:{}}" : "{:.{}f}", counter, KCPP::calculateGlyphsNeededForMaximumCounter() + 1, 6);
 
 		if (KCPP::fixedPoint) {
 			constexpr std::size_t dotPlace = KCPP::calculateGlyphsNeededForMaximumCounter() - KCPP::fixedPoint;
@@ -89,6 +89,8 @@ namespace KCPP {
 			counterString = counterString.substr(0, KCPP::calculateGlyphsNeededForMaximumCounter() + 1);
 			//counterString += "...";
 		}
+
+		counterString = counterString.substr(counterString.find_first_not_of(' '));
 
 		return counterString;
 	}
@@ -159,6 +161,8 @@ namespace KCPP {
 	constexpr double prestigePointIncrease = 1.1;
 
 	constexpr CounterType getNextPrestigePoint(PrestigeType prestige) {
+		if (prestige == std::numeric_limits < PrestigeType >::max()) 
+			return calculateMaximumCounterAllowingForPrecision();
 		CounterType currentPrestigePoint = prestigePoint;
 		for (size_t i = 0; i < prestige; i++) {
 			currentPrestigePoint *= prestigePointIncrease;

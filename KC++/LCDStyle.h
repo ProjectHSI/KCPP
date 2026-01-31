@@ -7,6 +7,7 @@
 #include <deque>
 #include "LCDFont.h"
 #include "UsernameFinder.h"
+#include <LCDStyleSave.pb.h>
 
 namespace KCPP {
 	namespace LCDStyle {
@@ -16,14 +17,37 @@ namespace KCPP {
 			std::size_t timeStamp {};
 		};
 
+		enum class TextAlignment {
+			Left,
+			Right
+		};
+
 		class LCDStyle : public KCPP::Style {
 		private:
+			std::array < float, 4 > backgroundColour {
+				0.0f, 0.0f, 0.0f, 0.1f
+			};
+
+			std::array < float, 4 > inactiveColour {
+				0.0f, 0.0f, 0.0f, 0.2f
+			};
+
+			std::array < float, 3 > activeColour {
+				0.0f, 1.0f, 0.0f
+			};
+
+			std::array < float, 3 > prestigeActiveColour {
+				1.0f, 1.0f, 0.0f
+			};
+
 			SDL_Surface *lcdTextureSurface = nullptr;
 			SDL_Texture *lcdTexture = nullptr;
 			//SDL_Texture *lcdTextureInvert = nullptr;
 
-			void renderGlyph(SDL_Renderer *renderer, const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige);
-			void renderGlyphWithChar(SDL_Renderer *renderer, char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige);
+			void renderGlyph(const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour);
+			void renderGlyphWithChar(char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour);
+
+			void renderGlyphs(std::string string, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour, std::string::size_type wantedRequiredLength = 0, TextAlignment textAlignment = TextAlignment::Right);
 
 			struct TickerAnimation {
 				std::string text {};
@@ -33,18 +57,6 @@ namespace KCPP {
 			std::deque < TickerAnimation > queuedTickerAnimations {};
 			std::deque < Touch > currentTouches {};
 
-			std::array < float, 4 > backgroundColour {
-				0.0f, 0.0f, 0.0f, 0.1f
-			};
-
-			std::array < float, 4 > inactiveColour {
-				0.0f, 0.0f, 0.0f, 0.2f
-			};
-																		  
-			std::array < float, 3 > activeColour {
-				0.0f, 1.0f, 0.0f
-			};
-
 
 			enum class UserNameConfiguration {
 				TechnicalName,
@@ -53,6 +65,13 @@ namespace KCPP {
 			};
 			UserNameConfiguration userNameConfiguration = UserNameConfiguration::TechnicalName;
 			std::string userName {};
+
+			::KCPP::LCDStyle::LCDElementAlignment  lcdGrabBarAlignment {};
+			::KCPP::LCDStyle::LCDElementAttachment lcdGrabBarAttachment {};
+			::KCPP::LCDStyle::LCDElementAlignment  lcdPrestigeAlignment {};
+			::KCPP::LCDStyle::LCDElementAttachment lcdPrestigeAttachment {};
+
+			std::array < int, 2 > getLcdTextureSize() const;
 
 			bool editJustPerformed = false;
 
@@ -79,7 +98,7 @@ namespace KCPP {
 			virtual bool renderNow();
 
 			virtual void init(SDL_Renderer *renderer) override;
-			virtual void resetRenderer(SDL_Renderer *renderer) override;
+			virtual void resetRenderer(SDL_Renderer *renderer = nullptr) override;
 
 			virtual bool sizeChangeNeeded(SDL_Window *window) override;
 			virtual std::array < int, 2 > getSize(SDL_Window *window) const override;

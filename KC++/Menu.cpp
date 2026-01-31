@@ -102,6 +102,7 @@ void KCPP::Menu::menuIterate() {
 
 		if (ImGui::Button("Yes")) {
 			KCPP::setCounter(0);
+			KCPP::setPrestige(0);
 			ImGui::CloseCurrentPopup();
 		}
 		ImGui::SameLine();

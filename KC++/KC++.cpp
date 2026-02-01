@@ -216,9 +216,9 @@ int main() {
 
 	KCPP::UsernameFinder::refreshCachedUserNames();
 
-	SDL_Init(SDL_INIT_VIDEO);
-
 	SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1");
+
+	SDL_Init(SDL_INIT_VIDEO);
 
 	KCPP::InputChecker::init();
 

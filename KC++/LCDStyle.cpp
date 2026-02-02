@@ -154,7 +154,8 @@ void KCPP::LCDStyle::LCDStyle::resetRenderer(SDL_Renderer *renderer) {
 		if (lcdTexture != nullptr)
 			renderer = SDL_GetRendererFromTexture(lcdTexture);
 		else
-			throw std::exception("No LCD Texture yet recreating textures from edit");
+			// No LCD Texture yet recreating textures from edit
+			throw std::exception();
 	}
 	if (lcdTexture != nullptr) {
 		SDL_DestroyTexture(lcdTexture);

@@ -57,6 +57,14 @@ jobs:
       with:
         submodules: recursive
 
+    
+    - name: CMake Cache
+      id: cmake-cache
+      uses: actions/cache@v5
+      with:
+        path: CodeQLBuild
+        key: codeql-cmake-cache
+
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.

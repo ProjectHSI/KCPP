@@ -102,7 +102,7 @@ jobs:
         & "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64
         cd $prevLocation
         cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe"
-        cmake --build CodeQLBuild
+        cmake --build CodeQLBuild -j
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4

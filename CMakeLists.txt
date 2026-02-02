@@ -61,7 +61,7 @@ if (MSVC)
 	add_compile_options("/wd4061") # Switch does not explictly handle enum value
 	add_compile_options("/permissive-")
 else()
-	add_compile_options("-Weverything")
+	add_compile_options("-Wpedantic")
 	add_compile_options("-Wno-c++98-compat") # C++98 Compat
 	add_compile_options("-Wno-c++98-compat-pedantic") # More C++98 Compat
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -O3")

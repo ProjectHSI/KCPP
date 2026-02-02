@@ -88,7 +88,7 @@ jobs:
       run: |
         $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
         $prevLocation = Get-Location
-        $vsPath\Common7\Tools\Launch-VsDevShell.ps1 -Arch x64 -HostArch x64
+        "& "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch x64 -HostArch x64"
         cd $prevLocation
         cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe"
         cmake --build CodeQLBuild

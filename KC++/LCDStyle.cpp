@@ -425,9 +425,9 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	SDL_UnlockTexture(lcdTexture);
 
 	SDL_SetRenderTarget(renderer, nullptr);
-	if (SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND))
+	if (!SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND))
 		std::terminate();
-	if (SDL_SetTextureBlendMode(lcdTexture, SDL_BLENDMODE_BLEND))
+	if (!SDL_SetTextureBlendMode(lcdTexture, SDL_BLENDMODE_BLEND))
 		std::terminate();
 	SDL_RenderTexture(renderer, lcdTexture, nullptr, nullptr);
 }

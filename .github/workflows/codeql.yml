@@ -87,8 +87,9 @@ jobs:
       if: matrix.build-mode == 'manual'
       run: |
         $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
-        $clVersion = cat "$vsPath\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt"
-        $clPath = "$vsPath\VC\Tools\MSVC\$clVersion\bin\HostX64\x64\cl.exe"
+        $prevLocation = Get-Location
+        \& "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch x64 -HostArch x64
+        cd $prevLocation
         cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=$clPath" "-DCMAKE_CXX_COMPILER=$clPath"
         cmake --build CodeQLBuild
 

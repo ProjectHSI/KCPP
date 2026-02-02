@@ -90,7 +90,7 @@ jobs:
         $prevLocation = Get-Location
         \& "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch x64 -HostArch x64
         cd $prevLocation
-        cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=$clPath" "-DCMAKE_CXX_COMPILER=$clPath"
+        cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe"
         cmake --build CodeQLBuild
 
     - name: Perform CodeQL Analysis

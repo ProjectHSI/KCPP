@@ -83,9 +83,13 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - name: Run manual build steps
+      shell: pwsh
       if: matrix.build-mode == 'manual'
       run: |
-        cmake -B CodeQLBuild --preset x64-release .
+        $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
+        $clVersion = cat "%vsPath%\VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt"
+        $clPath = "%vsPath%\VC\Tools\MSVC\%clVersion%\bin\HostX64\x64\cl.exe"
+        cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=$clPath" "-DCMAKE_CXX_COMPILER=$clPath"
         cmake --build CodeQLBuild
 
     - name: Perform CodeQL Analysis

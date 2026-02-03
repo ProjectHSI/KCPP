@@ -42,7 +42,7 @@ KCPP::LCDStyle::LCDStyle::LCDStyle() : KCPP::Style() {
 
 }
 
-KCPP::HitTestResult KCPP::LCDStyle::LCDStyle::hitTest(SDL_Window *window, const SDL_Point *cursorPos) {
+KCPP::HitTestResult KCPP::LCDStyle::LCDStyle::hitTest([[maybe_unused]] SDL_Window *hitTestWindow, const SDL_FPoint *cursorPos) {
 	switch (lcdGrabBarAlignment) {
 		case ::KCPP::LCDStyle::LCDElementAlignment::LEFT:
 			if (cursorPos->x <= (KCPP::LCDStyle::Font::width + 1) * lastContentScale)
@@ -51,10 +51,15 @@ KCPP::HitTestResult KCPP::LCDStyle::LCDStyle::hitTest(SDL_Window *window, const 
 				return KCPP::HitTestResult::Menu;
 			break;
 		case ::KCPP::LCDStyle::LCDElementAlignment::RIGHT:
-			if (cursorPos->x >= (getLcdTextureSize()[0] - (KCPP::LCDStyle::Font::width + 1)) * lastContentScale)
+			if (cursorPos->x >= static_cast < float >(getLcdTextureSize()[0] - (KCPP::LCDStyle::Font::width + 1)) * lastContentScale)
 				return KCPP::HitTestResult::None;
-			else if (cursorPos->x >= (getLcdTextureSize()[0] - (KCPP::LCDStyle::Font::width + 1) * 2) * lastContentScale)
+			else if (cursorPos->x >= static_cast < float >(getLcdTextureSize()[0] - (KCPP::LCDStyle::Font::width + 1) * 2) * lastContentScale)
 				return KCPP::HitTestResult::Menu;
+			break;
+		case ::KCPP::LCDStyle::LCDElementAlignment::LCDElementAlignment_INT_MIN_SENTINEL_DO_NOT_USE_:
+			[[fallthrough]];
+		case ::KCPP::LCDStyle::LCDElementAlignment::LCDElementAlignment_INT_MAX_SENTINEL_DO_NOT_USE_:
+			std::terminate();
 			break;
 	}
 	return KCPP::HitTestResult::StylePassthrough;
@@ -93,7 +98,7 @@ bool KCPP::LCDStyle::LCDStyle::renderNow() {
 	return renderingAnimations || editJustPerformedLocal || (KCPP::getCounter() > KCPP::getNextPrestigePoint(KCPP::getPrestige()) / 2);
 }
 
-void KCPP::LCDStyle::LCDStyle::init(SDL_Renderer *renderer) {
+void KCPP::LCDStyle::LCDStyle::init([[maybe_unused]] SDL_Renderer *renderer) {
 	switch (userNameConfiguration) {
 		case UserNameConfiguration::DisplayName:
 			if (KCPP::UsernameFinder::displayName.has_value()) {
@@ -133,7 +138,7 @@ static constexpr std::array < int, 2 > getLcdTextureSizeBase() {
 		+ (1 * ((glyphsNeeded + 1) - 1)) /* glyph padding */
 		+ 2 /* whole area padding */;
 
-	return {textureWidth, textureHeight};
+	return {{textureWidth, textureHeight}};
 }
 
 std::array<int, 2> KCPP::LCDStyle::LCDStyle::getLcdTextureSize() const {
@@ -165,7 +170,7 @@ void KCPP::LCDStyle::LCDStyle::resetRenderer(SDL_Renderer *renderer) {
 	SDL_SetTextureScaleMode(lcdTexture, SDL_SCALEMODE_PIXELART);
 }
 
-static inline constexpr ::std::size_t getPixelIndex(SDL_Surface *surface, const ::std::size_t x, const ::std::size_t y) {
+static inline constexpr ::std::size_t getPixelIndex(SDL_Surface *surface, const int x, const int y) {
 	return (x * 4) + (y * (surface->pitch / sizeof(float)));
 }
 
@@ -176,24 +181,24 @@ enum class PixelComponent {
 	A = 3
 };
 
-static inline float &pixel(SDL_Surface *surface, const ::std::size_t x, const ::std::size_t y, const PixelComponent component) {
+static inline float &pixel(SDL_Surface *surface, const int x, const int y, const PixelComponent component) {
 	return reinterpret_cast < float * >(surface->pixels)[getPixelIndex(surface, x, y) + static_cast < ::std::size_t >(component)];
 }
 
-void KCPP::LCDStyle::LCDStyle::renderGlyph(const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour) {
-	for (std::size_t y = 0; y < KCPP::LCDStyle::Font::height; ++y) {
-		for (std::size_t x = 0; x < KCPP::LCDStyle::Font::width; ++x) {
-			if (glyph[y][x] || KCPP::randomPrestigeProgressEvent(counter, prestige, 0.1)) {
-				std::memcpy(&reinterpret_cast < float * >(lcdTextureSurface->pixels)[getPixelIndex(lcdTextureSurface, x + xOffset, y + yOffset)], activeColour.data(), sizeof(activeColour));
+void KCPP::LCDStyle::LCDStyle::renderGlyph(const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) currentActiveColour, decltype(inactiveColour) currentInactiveColour ) {
+	for (int y = 0; y < static_cast < int >(KCPP::LCDStyle::Font::height); ++y) {
+		for (int x = 0; x < static_cast < int >(KCPP::LCDStyle::Font::width); ++x) {
+			if (glyph[static_cast < ::std::size_t >(y)][static_cast < ::std::size_t >(x)] || KCPP::randomPrestigeProgressEvent(counter, prestige, 0.1)) {
+				std::memcpy(&reinterpret_cast < float * >(lcdTextureSurface->pixels)[getPixelIndex(lcdTextureSurface, x + xOffset, y + yOffset)], currentActiveColour.data(), sizeof(currentActiveColour));
 				pixel(lcdTextureSurface, x + xOffset, y + yOffset, PixelComponent::A) = 1;
 			} else {
-				std::memcpy(&reinterpret_cast < float * >(lcdTextureSurface->pixels)[getPixelIndex(lcdTextureSurface, x + xOffset, y + yOffset)], inactiveColour.data(), sizeof(inactiveColour));
+				std::memcpy(&reinterpret_cast < float * >(lcdTextureSurface->pixels)[getPixelIndex(lcdTextureSurface, x + xOffset, y + yOffset)], currentInactiveColour.data(), sizeof(currentInactiveColour));
 			}
 		}
 	}
 }
 
-void KCPP::LCDStyle::LCDStyle::renderGlyphWithChar(char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour) {
+void KCPP::LCDStyle::LCDStyle::renderGlyphWithChar(char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, decltype(activeColour) currentActiveColour, decltype(inactiveColour) currentInactiveColour) {
 	renderGlyph(KCPP::LCDStyle::Font::glyphs.contains(character)
 				? KCPP::LCDStyle::Font::glyphs[character]
 				: KCPP::LCDStyle::Font::unknownCharacter,
@@ -201,11 +206,11 @@ void KCPP::LCDStyle::LCDStyle::renderGlyphWithChar(char character, int xOffset, 
 				yOffset,
 				counter,
 				prestige,
-				activeColour,
-				inactiveColour);
+				currentActiveColour,
+				currentInactiveColour);
 }
 
-void KCPP::LCDStyle::LCDStyle::renderGlyphs(std::string string, int xOffset, int yOffset, KCPP::CounterType count, KCPP::PrestigeType prestige, decltype(activeColour) activeColour, decltype(inactiveColour) inactiveColour, std::string::size_type wantedRequiredLength, KCPP::LCDStyle::TextAlignment textAlignment) {
+void KCPP::LCDStyle::LCDStyle::renderGlyphs(std::string string, int xOffset, int yOffset, KCPP::CounterType count, KCPP::PrestigeType prestige, decltype(activeColour) currentActiveColour, decltype(inactiveColour) currentInactiveColour, std::string::size_type wantedRequiredLength, KCPP::LCDStyle::TextAlignment textAlignment) {
 	std::string::size_type stringLength = string.size() <= wantedRequiredLength ? wantedRequiredLength : string.size();
 	std::string::size_type stringReadOffset = string.size() <= wantedRequiredLength ? wantedRequiredLength - string.size() : 0;
 
@@ -214,14 +219,14 @@ void KCPP::LCDStyle::LCDStyle::renderGlyphs(std::string string, int xOffset, int
 
 	for (std::string::size_type i = 0; i < stringLength; i++) {
 		renderGlyphWithChar(i - stringReadOffset < string.size() ? string[i - stringReadOffset] : ' ',
-							(i * KCPP::LCDStyle::Font::width) /* glyph size */
-							+ i	                              /* glyph padding */
+							static_cast < int >(i * KCPP::LCDStyle::Font::width) /* glyph size */
+							+ static_cast < int >(i)                             /* glyph padding */
 							+ xOffset,
 							yOffset,
 							count,
 							prestige,
-							activeColour,
-							inactiveColour
+							currentActiveColour,
+							currentInactiveColour
 		);
 	}
 }
@@ -232,9 +237,9 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 
 	SDL_LockTextureToSurface(lcdTexture, nullptr, &lcdTextureSurface);
 
-	std::size_t grabBarDetachPoint = 0;
-	std::size_t prestigeDetachPoint = 0;
-	constexpr std::size_t glyphsNeededForPrestigeCounter = ::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter();
+	int grabBarDetachPoint = 0;
+	int prestigeDetachPoint = 0;
+	//constexpr std::size_t glyphsNeededForPrestigeCounter = ::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter();
 
 	int grabBarOffset = 1;
 	int prestigeOffset = 1;
@@ -243,7 +248,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 
 
 	if (lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT) {
-		prestigeOffset += (::KCPP::LCDStyle::Font::width + 1) * 2;
+		prestigeOffset += static_cast < int >((::KCPP::LCDStyle::Font::width + 1) * 2);
 		if (lcdGrabBarAttachment == ::KCPP::LCDStyle::LCDElementAttachment::DETACHED) {
 			grabBarDetachPoint = prestigeOffset;
 			prestigeOffset += 2;
@@ -252,7 +257,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	}
 
 	if (lcdPrestigeAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT) {
-		constexpr std::size_t offsetFromCounter = (::KCPP::LCDStyle::Font::width + 1) * ::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter();
+		constexpr int offsetFromCounter = static_cast < int >((::KCPP::LCDStyle::Font::width + 1) * ::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter());
 		counterOffset += offsetFromCounter;
 		if (lcdPrestigeAttachment == ::KCPP::LCDStyle::LCDElementAttachment::DETACHED) {
 			//if (lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT)
@@ -262,7 +267,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	}
 
 	if (lcdPrestigeAlignment == ::KCPP::LCDStyle::LCDElementAlignment::RIGHT) {
-		constexpr std::size_t offsetFromCounter = (::KCPP::LCDStyle::Font::width + 1) * ::KCPP::calculateGlyphsNeededForMaximumCounter();
+		constexpr int offsetFromCounter = static_cast < int >((::KCPP::LCDStyle::Font::width + 1) * ::KCPP::calculateGlyphsNeededForMaximumCounter());
 		prestigeOffset += offsetFromCounter;
 		if (lcdPrestigeAttachment == ::KCPP::LCDStyle::LCDElementAttachment::DETACHED) {
 			prestigeDetachPoint = prestigeOffset;
@@ -272,10 +277,10 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 
 	if (lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::RIGHT) {
 		if (counterOffset > prestigeOffset) {
-			constexpr std::size_t offsetFromCounter = (::KCPP::LCDStyle::Font::width + 1) * (::KCPP::calculateGlyphsNeededForMaximumCounter() - 1);
+			constexpr int offsetFromCounter = static_cast < int >((::KCPP::LCDStyle::Font::width + 1) * (::KCPP::calculateGlyphsNeededForMaximumCounter() - 1));
 			grabBarOffset = counterOffset + offsetFromCounter;
 		} else {
-			constexpr std::size_t offsetFromCounter = (::KCPP::LCDStyle::Font::width + 1) * (::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() - 1);
+			constexpr int offsetFromCounter = static_cast < int >((::KCPP::LCDStyle::Font::width + 1) * (::KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() - 1));
 			grabBarOffset = prestigeOffset + offsetFromCounter;
 		}
 		grabBarOffset += (::KCPP::LCDStyle::Font::width + 1);
@@ -288,12 +293,10 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	grabBarDetachPoint = grabBarDetachPoint ? grabBarDetachPoint : -1;
 	prestigeDetachPoint = prestigeDetachPoint ? prestigeDetachPoint : -1;
 
-	for (std::size_t x = 0; x < getLcdTextureSize()[0]; x++) {
+	for (int x = 0; x < getLcdTextureSize()[0]; x++) {
 		bool fillColumnWithTransparent = x == grabBarDetachPoint || x == prestigeDetachPoint;
 
-		for (std::size_t y = 0; y < getLcdTextureSize()[1]; y++) {
-			std::size_t pixelIndex = (x * 4) + (y * (lcdTextureSurface->pitch / sizeof(float)));
-
+		for (int y = 0; y < getLcdTextureSize()[1]; y++) {
 			if (!fillColumnWithTransparent)
 				std::memcpy(&reinterpret_cast < float * >(lcdTextureSurface->pixels)[getPixelIndex(lcdTextureSurface, x, y)], backgroundColour.data(), sizeof(backgroundColour));
 			else {
@@ -306,7 +309,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	}
 
 	renderGlyph(lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT ? KCPP::LCDStyle::Font::dragCharacter : KCPP::LCDStyle::Font::menuCharacter, grabBarOffset, 1, count, prestige, activeColour, inactiveColour);
-	renderGlyph(lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT ? KCPP::LCDStyle::Font::menuCharacter : KCPP::LCDStyle::Font::dragCharacter, grabBarOffset + KCPP::LCDStyle::Font::width + 1, 1, count, prestige, activeColour, inactiveColour);
+	renderGlyph(lcdGrabBarAlignment == ::KCPP::LCDStyle::LCDElementAlignment::LEFT ? KCPP::LCDStyle::Font::menuCharacter : KCPP::LCDStyle::Font::dragCharacter, grabBarOffset + static_cast < int >(KCPP::LCDStyle::Font::width) + 1, 1, count, prestige, activeColour, inactiveColour);
 
 	std::string counterString = KCPP::calculateCounterString(count);
 	std::string prestigeString = KCPP::calculatePrestigeString(prestige);
@@ -325,7 +328,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 			queuedTickerAnimations.pop_front();
 		} else {
 			constexpr ::std::size_t counterGlyphs = ::KCPP::calculateGlyphsNeededForMaximumCounter();
-			signed long long lcdStringPosition = counterGlyphs - static_cast< signed long long >(phase);
+			signed long long lcdStringPosition = static_cast< signed long long >(counterGlyphs) - static_cast< signed long long >(phase);
 
 			std::string_view viewableString = queuedTickerAnimations.front().text;
 
@@ -369,16 +372,16 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 			const auto &touch = *touchI;
 			constexpr size_t touchRadius = 16;
 
-			double timeMult = ((touch.timeStamp + touchDuration - currentTouchTick) / static_cast < double >(touchDuration));
+			double timeMult = (static_cast < double >(touch.timeStamp + touchDuration - currentTouchTick) / static_cast < double >(touchDuration));
 
-			for (std::size_t y = 0; y < getLcdTextureSize()[1]; y++) {
-				for (std::size_t x = 0; x < getLcdTextureSize()[0]; x++) {
-					double effectivePixelX = x + 0.5;
-					double effectivePixelY = y + 0.5;
+			for (int y = 0; y < getLcdTextureSize()[1]; y++) {
+				for (int x = 0; x < getLcdTextureSize()[0]; x++) {
+					double effectivePixelX = static_cast < double >(x) + 0.5;
+					double effectivePixelY = static_cast < double >(y) + 0.5;
 					double dx = fabs(effectivePixelX - touch.x);
 					double dy = fabs(effectivePixelY - touch.y);
-					double distance = sqrtf(dx * dx + dy * dy);
-					double pixelAmount = (1 - (distance / touchRadius / timeMult));
+					double distance = sqrt(dx * dx + dy * dy);
+					float pixelAmount = static_cast < float >(1 - (distance / touchRadius / timeMult));
 
 					float dR = activeColour[0] - pixel(lcdTextureSurface, x, y, PixelComponent::R);
 					float dG = activeColour[1] - pixel(lcdTextureSurface, x, y, PixelComponent::G);
@@ -445,10 +448,10 @@ bool KCPP::LCDStyle::LCDStyle::sizeChangeNeeded(SDL_Window *window) {
 
 std::array<int, 2> KCPP::LCDStyle::LCDStyle::getSize(SDL_Window *window) const {
 	float contentScale = SDL_GetWindowDisplayScale(window) * 3;
-	return std::array<int, 2> {static_cast < int >(ceil(getLcdTextureSize()[0] * contentScale)), static_cast < int >(ceil(getLcdTextureSize()[1] * contentScale))};
+	return std::array<int, 2> {{static_cast < int >(ceil(static_cast < float >(getLcdTextureSize()[0]) *contentScale)), static_cast < int >(ceil(static_cast < float >(getLcdTextureSize()[1]) *contentScale))}};
 }
 
-void KCPP::LCDStyle::LCDStyle::quit(SDL_Renderer *renderer) {
+void KCPP::LCDStyle::LCDStyle::quit([[maybe_unused]] SDL_Renderer *renderer) {
 	SDL_DestroyTexture(lcdTexture);
 }
 
@@ -563,19 +566,49 @@ void KCPP::LCDStyle::LCDStyle::parseSettings(const std::string &data) {
 
 	lcdStyleProtoSave.ParseFromString(data);
 
-	activeColour[0] = lcdStyleProtoSave.activecolour().r();
-	activeColour[1] = lcdStyleProtoSave.activecolour().g();
-	activeColour[2] = lcdStyleProtoSave.activecolour().b();
+	if (lcdStyleProtoSave.has_activecolour_double()) {
+		activeColour[0] = static_cast < float >(lcdStyleProtoSave.activecolour_double().r());
+		activeColour[1] = static_cast < float >(lcdStyleProtoSave.activecolour_double().g());
+		activeColour[2] = static_cast < float >(lcdStyleProtoSave.activecolour_double().b());
+	} else {
+		activeColour[0] = lcdStyleProtoSave.active_colour().r();
+		activeColour[1] = lcdStyleProtoSave.active_colour().g();
+		activeColour[2] = lcdStyleProtoSave.active_colour().b();
+	}
 
-	inactiveColour[0] = lcdStyleProtoSave.inactivecolour().r();
-	inactiveColour[1] = lcdStyleProtoSave.inactivecolour().g();
-	inactiveColour[2] = lcdStyleProtoSave.inactivecolour().b();
-	inactiveColour[3] = lcdStyleProtoSave.inactivecolour().a();
+	if (lcdStyleProtoSave.has_prestige_active_colour_double()) {
+		prestigeActiveColour[0] = static_cast < float >(lcdStyleProtoSave.prestige_active_colour_double().r());
+		prestigeActiveColour[1] = static_cast < float >(lcdStyleProtoSave.prestige_active_colour_double().g());
+		prestigeActiveColour[2] = static_cast < float >(lcdStyleProtoSave.prestige_active_colour_double().b());
+	} else {
+		prestigeActiveColour[0] = lcdStyleProtoSave.prestige_active_colour().r();
+		prestigeActiveColour[1] = lcdStyleProtoSave.prestige_active_colour().g();
+		prestigeActiveColour[2] = lcdStyleProtoSave.prestige_active_colour().b();
+	}
 
-	backgroundColour[0] = lcdStyleProtoSave.bgcolour().r();
-	backgroundColour[1] = lcdStyleProtoSave.bgcolour().g();
-	backgroundColour[2] = lcdStyleProtoSave.bgcolour().b();
-	backgroundColour[3] = lcdStyleProtoSave.bgcolour().a();
+	if (lcdStyleProtoSave.has_inactivecolour_double()) {
+		inactiveColour[0] = static_cast < float >(lcdStyleProtoSave.inactivecolour_double().r());
+		inactiveColour[1] = static_cast < float >(lcdStyleProtoSave.inactivecolour_double().g());
+		inactiveColour[2] = static_cast < float >(lcdStyleProtoSave.inactivecolour_double().b());
+		inactiveColour[3] = static_cast < float >(lcdStyleProtoSave.inactivecolour_double().a());
+	} else {
+		inactiveColour[0] = lcdStyleProtoSave.inactive_colour().r();
+		inactiveColour[1] = lcdStyleProtoSave.inactive_colour().g();
+		inactiveColour[2] = lcdStyleProtoSave.inactive_colour().b();
+		inactiveColour[3] = lcdStyleProtoSave.inactive_colour().a();
+	}
+
+	if (lcdStyleProtoSave.has_bgcolour_double()) {
+		backgroundColour[0] = static_cast < float >(lcdStyleProtoSave.bgcolour_double().r());
+		backgroundColour[1] = static_cast < float >(lcdStyleProtoSave.bgcolour_double().g());
+		backgroundColour[2] = static_cast < float >(lcdStyleProtoSave.bgcolour_double().b());
+		backgroundColour[3] = static_cast < float >(lcdStyleProtoSave.bgcolour_double().a());
+	} else {
+		backgroundColour[0] = lcdStyleProtoSave.bg_colour().r();
+		backgroundColour[1] = lcdStyleProtoSave.bg_colour().g();
+		backgroundColour[2] = lcdStyleProtoSave.bg_colour().b();
+		backgroundColour[3] = lcdStyleProtoSave.bg_colour().a();
+	}
 
 	if (lcdStyleProtoSave.has_user_name_text()) {
 		userNameConfiguration = UserNameConfiguration::UserChosen;
@@ -587,23 +620,23 @@ void KCPP::LCDStyle::LCDStyle::parseSettings(const std::string &data) {
 std::string KCPP::LCDStyle::LCDStyle::generateSettings() {
 	KCPP::LCDStyle::LCDStyleSave lcdStyleProtoSave {};
 
-	lcdStyleProtoSave.mutable_activecolour()->set_r(activeColour[0]);
-	lcdStyleProtoSave.mutable_activecolour()->set_g(activeColour[1]);
-	lcdStyleProtoSave.mutable_activecolour()->set_b(activeColour[2]);
+	lcdStyleProtoSave.mutable_active_colour()->set_r(activeColour[0]);
+	lcdStyleProtoSave.mutable_active_colour()->set_g(activeColour[1]);
+	lcdStyleProtoSave.mutable_active_colour()->set_b(activeColour[2]);
 
 	lcdStyleProtoSave.mutable_prestige_active_colour()->set_r(prestigeActiveColour[0]);
 	lcdStyleProtoSave.mutable_prestige_active_colour()->set_g(prestigeActiveColour[1]);
 	lcdStyleProtoSave.mutable_prestige_active_colour()->set_b(prestigeActiveColour[2]);
 
-	lcdStyleProtoSave.mutable_inactivecolour()->set_r(inactiveColour[0]);
-	lcdStyleProtoSave.mutable_inactivecolour()->set_g(inactiveColour[1]);
-	lcdStyleProtoSave.mutable_inactivecolour()->set_b(inactiveColour[2]);
-	lcdStyleProtoSave.mutable_inactivecolour()->set_a(inactiveColour[3]);
+	lcdStyleProtoSave.mutable_inactive_colour()->set_r(inactiveColour[0]);
+	lcdStyleProtoSave.mutable_inactive_colour()->set_g(inactiveColour[1]);
+	lcdStyleProtoSave.mutable_inactive_colour()->set_b(inactiveColour[2]);
+	lcdStyleProtoSave.mutable_inactive_colour()->set_a(inactiveColour[3]);
 
-	lcdStyleProtoSave.mutable_bgcolour()->set_r(backgroundColour[0]);
-	lcdStyleProtoSave.mutable_bgcolour()->set_g(backgroundColour[1]);
-	lcdStyleProtoSave.mutable_bgcolour()->set_b(backgroundColour[2]);
-	lcdStyleProtoSave.mutable_bgcolour()->set_a(backgroundColour[3]);
+	lcdStyleProtoSave.mutable_bg_colour()->set_r(backgroundColour[0]);
+	lcdStyleProtoSave.mutable_bg_colour()->set_g(backgroundColour[1]);
+	lcdStyleProtoSave.mutable_bg_colour()->set_b(backgroundColour[2]);
+	lcdStyleProtoSave.mutable_bg_colour()->set_a(backgroundColour[3]);
 
 	if (userNameConfiguration == UserNameConfiguration::UserChosen)
 		lcdStyleProtoSave.set_user_name_text(userName);

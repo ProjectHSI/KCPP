@@ -22,9 +22,13 @@
 
 KCPP::Style *KCPP::currentStyle;
 
-SDL_HitTestResult hitTest(SDL_Window *window, const SDL_Point *point, void *data) {
+SDL_HitTestResult hitTest(SDL_Window *hitTestWindow, const SDL_Point *point, [[maybe_unused]] void *data) {
+	SDL_FPoint fPoint {};
+	fPoint.x = static_cast < float >(point->x);
+	fPoint.y = static_cast < float >(point->y);
+
 	if (KCPP::currentStyle != nullptr) {
-		switch (KCPP::currentStyle->hitTest(window, point)) {
+		switch (KCPP::currentStyle->hitTest(hitTestWindow, &fPoint)) {
 			case KCPP::HitTestResult::Menu:
 				return SDL_HITTEST_NORMAL;
 			case KCPP::HitTestResult::StylePassthrough:
@@ -169,7 +173,7 @@ static void toggleMenu() {
 	}
 }
 
-static bool SDLCALL eventWatch(void *userdata, SDL_Event *event) {
+static bool SDLCALL eventWatch([[maybe_unused]] void *userdata, SDL_Event *event) {
 	if (event->type == SDL_EVENT_WINDOW_EXPOSED || (menuOpen && event->type == SDL_EVENT_WINDOW_MOVED)) {
 		iterate(true);
 		//std::cout << "event watch iter" << '\n';
@@ -180,7 +184,7 @@ static bool SDLCALL eventWatch(void *userdata, SDL_Event *event) {
 	return true;
 }
 
-static void SDLCALL trayToggleWindowFunc(void *userdata, SDL_TrayEntry *entry) {
+static void SDLCALL trayToggleWindowFunc([[maybe_unused]] void *userdata, [[maybe_unused]] SDL_TrayEntry *entry) {
 	if (localIsWindowShown) {
 		SDL_HideWindow(window);
 		localIsWindowShown = false;
@@ -192,13 +196,13 @@ static void SDLCALL trayToggleWindowFunc(void *userdata, SDL_TrayEntry *entry) {
 	}
 }
 
-static void SDLCALL trayRecenterWindowFunc(void *userdata, SDL_TrayEntry *entry) {
+static void SDLCALL trayRecenterWindowFunc([[maybe_unused]] void *userdata, [[maybe_unused]] SDL_TrayEntry *entry) {
 	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 bool continueRunning = true;
 
-static void SDLCALL trayQuitFunc(void *userdata, SDL_TrayEntry *entry) {
+static void SDLCALL trayQuitFunc([[maybe_unused]] void *userdata, [[maybe_unused]] SDL_TrayEntry *entry) {
 	continueRunning = false;
 }
 
@@ -290,7 +294,7 @@ int main() {
 				}
 			} else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
 				if (KCPP::currentStyle != nullptr) {
-					SDL_Point eventCoordinatesAsPoint {event.button.x, event.button.y};
+					SDL_FPoint eventCoordinatesAsPoint {event.button.x, event.button.y};
 
 					if (KCPP::currentStyle->hitTest(window, &eventCoordinatesAsPoint) == KCPP::HitTestResult::Menu) {
 						toggleMenu();

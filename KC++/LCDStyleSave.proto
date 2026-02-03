@@ -4,17 +4,30 @@ option optimize_for = LITE_RUNTIME;
 
 package KCPP.LCDStyle;
 
-message LCDColour3 {
+message LCDColour3Double {
 	double r = 1;
 	double g = 2;
 	double b = 3;
 }
 
-message LCDColour4 {
+message LCDColour4Double {
 	double r = 1;
 	double g = 2;
 	double b = 3;
 	double a = 4;
+}
+
+message LCDColour3 {
+	float r = 1;
+	float g = 2;
+	float b = 3;
+}
+
+message LCDColour4 {
+	float r = 1;
+	float g = 2;
+	float b = 3;
+	float a = 4;
 }
 
 enum LCDUserNameType {
@@ -33,10 +46,14 @@ enum LCDElementAttachment {
 }
 
 message LCDStyleSave {
-	LCDColour3 activeColour = 1;
-	LCDColour3 prestige_active_colour = 10;
-	LCDColour4 inactiveColour = 2;
-	LCDColour4 bgColour = 3;
+	optional LCDColour3Double activeColour_double = 1;
+	optional LCDColour3Double prestige_active_colour_double = 10;
+	optional LCDColour4Double inactiveColour_double = 2;
+	optional LCDColour4Double bgColour_double = 3;
+	LCDColour3 active_colour = 11;
+	LCDColour3 prestige_active_colour = 12;
+	LCDColour4 inactive_colour = 13;
+	LCDColour4 bg_colour = 14;
 	oneof user_name {
 		string user_name_text = 4;
 		LCDUserNameType user_name_policy = 5;

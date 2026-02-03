@@ -24,8 +24,8 @@ namespace KCPP {
 
 
 
-		virtual HitTestResult hitTest(SDL_Window *window, const SDL_Point *cursorPos) = 0;
-		virtual bool processEvent(SDL_Event &event) { return true; };
+		virtual HitTestResult hitTest(SDL_Window *window, const SDL_FPoint *cursorPos) = 0;
+		virtual bool processEvent([[maybe_unused]] SDL_Event &event) { return true; };
 
 		virtual bool renderNow() = 0;
 

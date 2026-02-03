@@ -22,8 +22,9 @@ namespace KCPP {
 		return value + counterTypePrecisionWanted;
 	}
 
-	constexpr KCPP::CounterType constexprExp(std::size_t base, std::size_t exponent) {
-		KCPP::CounterType result = 1;
+	template < typename Base, typename Exponent >
+	constexpr Base constexprExp(Base base, Exponent exponent) {
+		Base result = 1;
 		for (std::size_t i = 0; i < exponent; ++i) {
 			result *= base;
 		}
@@ -40,9 +41,9 @@ namespace KCPP {
 		std::size_t currentExponent = 0;
 		while (true) {
 			if (
-				constexprExp(2, currentExponent) + counterTypePrecisionWanted == constexprExp(2, currentExponent)
+				constexprExp < KCPP::CounterType > (2, currentExponent) + counterTypePrecisionWanted == constexprExp < KCPP::CounterType >(2, currentExponent)
 				) {
-				return constexprExp(2, currentExponent);
+				return constexprExp < KCPP::CounterType >(2, currentExponent);
 			} else {
 				currentExponent++;
 			}
@@ -72,7 +73,7 @@ namespace KCPP {
 				counterString[i] = counterString[i + 1];
 			}
 
-			if (counter < KCPP::constexprExp(10, KCPP::fixedPoint)) {
+			if (counter < KCPP::constexprExp < KCPP::CounterType >(10, KCPP::fixedPoint)) {
 				for (size_t i = dotPlace - 1; i < KCPP::calculateGlyphsNeededForMaximumCounter(); i++) {
 					if (
 						i != dotPlace
@@ -120,7 +121,7 @@ namespace KCPP {
 			std::size_t effectiveI = romanNumerals.size() - 1 - i;
 			uint_fast8_t romanNumeralUsedTimes = 0;
 
-			std::array < char, 4 > workingRomanNumeralAdd {0, 0, 0, 0};
+			std::array < char, 4 > workingRomanNumeralAdd {{0, 0, 0, 0}};
 
 			while (prestigeCounter >= romanNumerals[effectiveI].first) {
 				romanNumeralUsedTimes++;
@@ -130,10 +131,10 @@ namespace KCPP {
 				if (romanNumeralUsedTimes == 4 - (effectiveI % 2)) {
 					assert(i != 0);
 					workingRomanNumeralAdd[0] = romanNumerals[effectiveI].second;
-					workingRomanNumeralAdd[1] = romanNumerals[effectiveI + 1].second;
+					workingRomanNumeralAdd[1] = romanNumerals[effectiveI + 1u].second;
 					workingRomanNumeralAdd[2] = '\0';
 				} else {
-					workingRomanNumeralAdd[romanNumeralUsedTimes - 1] = romanNumerals[effectiveI].second;
+					workingRomanNumeralAdd[romanNumeralUsedTimes - 1u] = romanNumerals[effectiveI].second;
 				}
 
 				prestigeCounter -= romanNumerals[effectiveI].first;
@@ -147,7 +148,7 @@ namespace KCPP {
 	constexpr ::std::size_t calculateGlyphsNeededForMaximumPrestigeCounter() {
 		::std::size_t currentGlyphsNeeded = 0;
 
-		for (size_t i = 0; i <= std::numeric_limits < PrestigeType >::max(); i++) {
+		for (PrestigeType i = 0; i < std::numeric_limits < PrestigeType >::max(); i++) {
 			if (::std::size_t romanNumeralCount = calculatePrestigeString(i).size(); currentGlyphsNeeded < romanNumeralCount)
 				currentGlyphsNeeded = romanNumeralCount;
 		}
@@ -157,14 +158,14 @@ namespace KCPP {
 	}
 	static_assert(calculateGlyphsNeededForMaximumPrestigeCounter() > 4);
 
-	constexpr CounterType prestigePoint = 100000 * constexprExp(10, fixedPoint);
-	constexpr double prestigePointIncrease = 1.1;
+	constexpr CounterType prestigePoint = 100000u * constexprExp(10u, fixedPoint);
+	constexpr CounterType prestigePointIncrease = static_cast < CounterType >(1.1 * constexprExp(10u, fixedPoint));
 
 	constexpr CounterType getNextPrestigePoint(PrestigeType prestige) {
 		if (prestige == std::numeric_limits < PrestigeType >::max()) 
 			return calculateMaximumCounterAllowingForPrecision();
 		CounterType currentPrestigePoint = prestigePoint;
-		for (size_t i = 0; i < prestige; i++) {
+		for (PrestigeType i = 0; i < prestige; i++) {
 			currentPrestigePoint *= prestigePointIncrease;
 		}
 		return currentPrestigePoint;
@@ -172,7 +173,7 @@ namespace KCPP {
 
 	inline bool randomPrestigeProgressEvent(CounterType counter, PrestigeType prestige, double chanceModifier = 1) {
 		CounterType nextPrestigePoint = getNextPrestigePoint(prestige);
-		double nextPrestigePointProgress = counter / static_cast < double >(nextPrestigePoint);
+		double nextPrestigePointProgress = static_cast < double >(counter) / static_cast < double >(nextPrestigePoint);
 
 		nextPrestigePointProgress -= 0.5;
 
@@ -183,7 +184,7 @@ namespace KCPP {
 
 		//std::cout << nextPrestigePointProgress << '\n';
 
-		int randMin = RAND_MAX - (RAND_MAX * nextPrestigePointProgress) * (chanceModifier);
+		int randMin = RAND_MAX - static_cast < int >(static_cast < double >(RAND_MAX) * (nextPrestigePointProgress * chanceModifier));
 
 		int randResult = rand();
 

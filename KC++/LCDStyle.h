@@ -24,21 +24,21 @@ namespace KCPP {
 
 		class LCDStyle : public KCPP::Style {
 		private:
-			std::array < float, 4 > backgroundColour {
+			std::array < float, 4 > backgroundColour {{
 				0.0f, 0.0f, 0.0f, 0.1f
-			};
+			}};
 
-			std::array < float, 4 > inactiveColour {
+			std::array < float, 4 > inactiveColour {{
 				0.0f, 0.0f, 0.0f, 0.2f
-			};
+			}};
 
-			std::array < float, 3 > activeColour {
+			std::array < float, 3 > activeColour {{
 				0.0f, 1.0f, 0.0f
-			};
+			}};
 
-			std::array < float, 3 > prestigeActiveColour {
+			std::array < float, 3 > prestigeActiveColour {{
 				1.0f, 1.0f, 0.0f
-			};
+			}};
 
 			SDL_Surface *lcdTextureSurface = nullptr;
 			SDL_Texture *lcdTexture = nullptr;
@@ -92,7 +92,7 @@ namespace KCPP {
 
 			LCDStyle();
 
-			virtual KCPP::HitTestResult hitTest(SDL_Window *window, const SDL_Point *cursorPos);
+			virtual KCPP::HitTestResult hitTest(SDL_Window *window, const SDL_FPoint *cursorPos);
 			virtual bool processEvent(SDL_Event &event);
 
 			virtual bool renderNow();

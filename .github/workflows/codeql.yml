@@ -116,7 +116,7 @@ jobs:
       with:
         patterns: |
           -ext/**
-          -**.pb.*
+          -**/*.pb.*
         input: sarif-results/cpp.sarif
         output: sarif-results/cpp.sarif
 

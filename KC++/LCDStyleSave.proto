@@ -4,19 +4,6 @@ option optimize_for = LITE_RUNTIME;
 
 package KCPP.LCDStyle;
 
-message LCDColour3Double {
-	double r = 1;
-	double g = 2;
-	double b = 3;
-}
-
-message LCDColour4Double {
-	double r = 1;
-	double g = 2;
-	double b = 3;
-	double a = 4;
-}
-
 message LCDColour3 {
 	float r = 1;
 	float g = 2;
@@ -45,22 +32,43 @@ enum LCDElementAttachment {
 	DETACHED = 1;
 }
 
+// backwards compat
+message LCDColour3Double {
+	double r = 1;
+	double g = 2;
+	double b = 3;
+}
+
+message LCDColour4Double {
+	double r = 1;
+	double g = 2;
+	double b = 3;
+	double a = 4;
+}
+
 message LCDStyleSave {
-	optional LCDColour3Double activeColour_double = 1;
-	optional LCDColour3Double prestige_active_colour_double = 10;
-	optional LCDColour4Double inactiveColour_double = 2;
-	optional LCDColour4Double bgColour_double = 3;
 	LCDColour3 active_colour = 11;
 	LCDColour3 prestige_active_colour = 12;
 	LCDColour4 inactive_colour = 13;
 	LCDColour4 bg_colour = 14;
+
 	oneof user_name {
 		string user_name_text = 4;
 		LCDUserNameType user_name_policy = 5;
 	}
 	
-	LCDElementAlignment lcdGrabBarAlignment = 6;
-	LCDElementAttachment lcdGrabBarAttachment = 7;
-	LCDElementAlignment lcdPrestigeCounterAlignment = 8;
-	LCDElementAttachment lcdPrestigeCounterAttachment = 9;
+	LCDElementAlignment lcd_grab_bar_alignment = 6;
+	LCDElementAttachment lcd_grab_bar_attachment = 7;
+	LCDElementAlignment lcd_prestige_counter_alignment = 8;
+	LCDElementAttachment lcd_prestige_counter_attachment = 9;
+
+	bool fast_quit = 16;
+
+	uint32 lcd_save_version = 15;
+
+	// backwards compat
+	optional LCDColour3Double active_colour_double = 1;
+	optional LCDColour3Double prestige_active_colour_double = 10;
+	optional LCDColour4Double inactive_colour_double = 2;
+	optional LCDColour4Double bg_colour_double = 3;
 }

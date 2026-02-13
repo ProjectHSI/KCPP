@@ -11,6 +11,7 @@ namespace KCPP {
 		Menu,
 		StylePassthrough,
 		//StylePassthroughAndDraggable,
+		Close,
 		None
 	};
 	class Style {

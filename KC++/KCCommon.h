@@ -101,13 +101,16 @@ namespace KCPP {
 
 	using PrestigeType = ::std::uint_least8_t;
 
-	using RomanNumeralStorage = std::pair < PrestigeType, char >;
+	struct RomanNumeralStorage {
+		PrestigeType romanNumeralValue;
+		char romanNumeralChar;
+	};
 	constexpr std::array romanNumerals {
-		RomanNumeralStorage { 1, 'I'},
-		RomanNumeralStorage { 5, 'V'},
-		RomanNumeralStorage { 10, 'X'},
-		RomanNumeralStorage { 50, 'L'},
-		RomanNumeralStorage { 100, 'C'},
+		RomanNumeralStorage { 1, 'I' },
+		RomanNumeralStorage { 5, 'V' },
+		RomanNumeralStorage { 10, 'X' },
+		RomanNumeralStorage { 50, 'L' },
+		RomanNumeralStorage { 100, 'C' },
 		//RomanNumeralStorage { 500, 'D'},
 		//RomanNumeralStorage { 1000, 'M'}
 	};
@@ -123,21 +126,21 @@ namespace KCPP {
 
 			std::array < char, 4 > workingRomanNumeralAdd {{0, 0, 0, 0}};
 
-			while (prestigeCounter >= romanNumerals[effectiveI].first) {
+			while (prestigeCounter >= romanNumerals[effectiveI].romanNumeralValue) {
 				romanNumeralUsedTimes++;
 
 				assert(romanNumeralUsedTimes != 5);
 
 				if (romanNumeralUsedTimes == 4 - (effectiveI % 2)) {
 					assert(i != 0);
-					workingRomanNumeralAdd[0] = romanNumerals[effectiveI].second;
-					workingRomanNumeralAdd[1] = romanNumerals[effectiveI + 1u].second;
+					workingRomanNumeralAdd[0] = romanNumerals[effectiveI].romanNumeralChar;
+					workingRomanNumeralAdd[1] = romanNumerals[effectiveI + 1u].romanNumeralChar;
 					workingRomanNumeralAdd[2] = '\0';
 				} else {
-					workingRomanNumeralAdd[romanNumeralUsedTimes - 1u] = romanNumerals[effectiveI].second;
+					workingRomanNumeralAdd[romanNumeralUsedTimes - 1u] = romanNumerals[effectiveI].romanNumeralChar;
 				}
 
-				prestigeCounter -= romanNumerals[effectiveI].first;
+				prestigeCounter -= romanNumerals[effectiveI].romanNumeralValue;
 			}
 
 			romanNumeral += workingRomanNumeralAdd.data();
@@ -158,15 +161,15 @@ namespace KCPP {
 	}
 	static_assert(calculateGlyphsNeededForMaximumPrestigeCounter() > 4);
 
-	constexpr CounterType prestigePoint = 100000u * constexprExp(10u, fixedPoint);
-	constexpr CounterType prestigePointIncrease = static_cast < CounterType >(1.1 * constexprExp(10u, fixedPoint));
+	constexpr CounterType prestigePoint = static_cast < CounterType >(100000u) * constexprExp < CounterType > (10u, fixedPoint);
+	constexpr double prestigePointIncrease = 1.1;
 
 	constexpr CounterType getNextPrestigePoint(PrestigeType prestige) {
 		if (prestige == std::numeric_limits < PrestigeType >::max()) 
 			return calculateMaximumCounterAllowingForPrecision();
 		CounterType currentPrestigePoint = prestigePoint;
 		for (PrestigeType i = 0; i < prestige; i++) {
-			currentPrestigePoint *= prestigePointIncrease;
+			currentPrestigePoint = static_cast < CounterType >(static_cast < double >(currentPrestigePoint) * prestigePointIncrease);
 		}
 		return currentPrestigePoint;
 	}
@@ -205,6 +208,10 @@ namespace KCPP {
 		combinedString.insert(combinedString.size(), calculateCounterString(counterType));
 		return combinedString;
 	}
+
+
+
+	constexpr bool EnableVSync = true;
 
 	//constexpr KCPP::CounterType maximumCounterAllowingForPrecision = calculateMaximumCounterAllowingForPrecision();
 }

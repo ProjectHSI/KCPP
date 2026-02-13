@@ -1,6 +1,7 @@
 ﻿// KC++.cpp : Defines the entry point for the application.
 //
 
+#include "WarningManagement.h"
 #include "KC++.h"
 #include <SDL3/SDL.h>
 #include <numbers>
@@ -13,7 +14,10 @@
 #include <Windows.h>
 #endif
 #include "Styles.h"
+#pragma warning( push, 1 )
+#pragma warning(disable : 4371 4365 4626 5027 4100 4946 4371 5267 5243)
 #include <KC++Save.pb.h>
+#pragma warning( pop )
 #include "Save.h"
 #include <KC++.png.h>
 
@@ -30,10 +34,13 @@ SDL_HitTestResult hitTest(SDL_Window *hitTestWindow, const SDL_Point *point, [[m
 	if (KCPP::currentStyle != nullptr) {
 		switch (KCPP::currentStyle->hitTest(hitTestWindow, &fPoint)) {
 			case KCPP::HitTestResult::Menu:
-				return SDL_HITTEST_NORMAL;
+				[[fallthrough]];
 			case KCPP::HitTestResult::StylePassthrough:
+				[[fallthrough]];
+			case KCPP::HitTestResult::Close:
 				return SDL_HITTEST_NORMAL;
 			case KCPP::HitTestResult::None:
+				[[fallthrough]];
 			default:
 				return SDL_HITTEST_DRAGGABLE;
 		}
@@ -42,9 +49,9 @@ SDL_HitTestResult hitTest(SDL_Window *hitTestWindow, const SDL_Point *point, [[m
 	}
 }
 
-SDL_Window *window;
+SDL_Window *mainWindow;
 SDL_Surface *kcppIcon;
-SDL_Renderer *renderer;
+SDL_Renderer *mainRenderer;
 
 SDL_Tray *tray;
 SDL_TrayMenu *trayMenu;
@@ -63,7 +70,7 @@ bool localIsWindowShown = true;
 
 void KCPP::hideWindow() {
 	localIsWindowShown = false;
-	SDL_HideWindow(window);
+	SDL_HideWindow(mainWindow);
 	SDL_SetTrayEntryEnabled(trayRecenterWindow, false);
 }
 
@@ -74,12 +81,12 @@ bool KCPP::isWindowShown() {
 std::pair<int, int> KCPP::getWindowPosition(void) {
 	int x {};
 	int y {};
-	SDL_GetWindowPosition(window, &x, &y);
+	SDL_GetWindowPosition(mainWindow, &x, &y);
 	return {x, y};
 }
 
 void KCPP::setWindowPosition(std::pair<int, int> windowPos) {
-	SDL_SetWindowPosition(window, windowPos.first, windowPos.second);
+	SDL_SetWindowPosition(mainWindow, windowPos.first, windowPos.second);
 }
 
 void KCPP::setCounter(KCPP::CounterType newCounter) {
@@ -103,12 +110,7 @@ KCPP::PrestigeType KCPP::getPrestige() {
 	return prestigeCounter;
 }
 
-void iterate(bool fromMainLoop) {
-	//std::cout << "iter" << '\n';
-
-	if (fromMainLoop)
-		KCPP::Menu::menuIterate();
-
+static void iterate() {
 	if (autoSaveCounter < SDL_GetTicks() / autoSaveInterval) {
 		autoSaveCounter = SDL_GetTicks() / autoSaveInterval;
 		KCPP::Save::save();
@@ -143,20 +145,20 @@ void iterate(bool fromMainLoop) {
 		//: inputCounter;
 
 	if (KCPP::currentStyle != nullptr) {
-		if (KCPP::currentStyle->sizeChangeNeeded(window)) {
-			SDL_SetWindowSize(window,
-							  KCPP::currentStyle->getSize(window)[0],
-							  KCPP::currentStyle->getSize(window)[1]
+		if (KCPP::currentStyle->sizeChangeNeeded(mainWindow)) {
+			SDL_SetWindowSize(mainWindow,
+							  KCPP::currentStyle->getSize(mainWindow)[0],
+							  KCPP::currentStyle->getSize(mainWindow)[1]
 			);
 			renderNeeded = true;
 		}
 
 		if (renderNeeded || KCPP::currentStyle->renderNow()) {
-			KCPP::currentStyle->render(renderer, inputCounter, prestigeCounter);
+			KCPP::currentStyle->render(mainRenderer, inputCounter, prestigeCounter);
 			//std::cout << inputCounter << '\n';
 		}
 
-		SDL_RenderPresent(renderer);
+		SDL_RenderPresent(mainRenderer);
 		renderNeeded = false;
 	}
 }
@@ -174,8 +176,10 @@ static void toggleMenu() {
 }
 
 static bool SDLCALL eventWatch([[maybe_unused]] void *userdata, SDL_Event *event) {
-	if (event->type == SDL_EVENT_WINDOW_EXPOSED || (menuOpen && event->type == SDL_EVENT_WINDOW_MOVED)) {
-		iterate(true);
+	//std::cout << event->type << '\n';
+	if (event->type == SDL_EVENT_WINDOW_EXPOSED) {
+		iterate();
+		::KCPP::Menu::menuIterate();
 		//std::cout << "event watch iter" << '\n';
 	} else {
 		//std::cout << event->type << '\n';
@@ -186,18 +190,18 @@ static bool SDLCALL eventWatch([[maybe_unused]] void *userdata, SDL_Event *event
 
 static void SDLCALL trayToggleWindowFunc([[maybe_unused]] void *userdata, [[maybe_unused]] SDL_TrayEntry *entry) {
 	if (localIsWindowShown) {
-		SDL_HideWindow(window);
+		SDL_HideWindow(mainWindow);
 		localIsWindowShown = false;
 		SDL_SetTrayEntryEnabled(trayRecenterWindow, false);
 	} else {
-		SDL_ShowWindow(window);
+		SDL_ShowWindow(mainWindow);
 		localIsWindowShown = true;
 		SDL_SetTrayEntryEnabled(trayRecenterWindow, true);
 	}
 }
 
 static void SDLCALL trayRecenterWindowFunc([[maybe_unused]] void *userdata, [[maybe_unused]] SDL_TrayEntry *entry) {
-	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowPosition(mainWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 bool continueRunning = true;
@@ -226,20 +230,20 @@ int main() {
 
 	KCPP::InputChecker::init();
 
-	window = SDL_CreateWindow("KC++", 1, 1, SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_TRANSPARENT | SDL_WINDOW_UTILITY | SDL_WINDOW_BORDERLESS);
+	mainWindow = SDL_CreateWindow("KC++", 1, 1, SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_TRANSPARENT | SDL_WINDOW_UTILITY | SDL_WINDOW_BORDERLESS);
 
-	if (!window) {
+	if (!mainWindow) {
 		std::cout << "STOP! window not init; " << SDL_GetError() << '\n';
 		std::terminate();
 	}
 
 	kcppIcon = SDL_LoadPNG_IO(SDL_IOFromConstMem(kcppPng.data(), kcppPng.size()), true);
 
-	SDL_SetWindowIcon(window, kcppIcon);
+	SDL_SetWindowIcon(mainWindow, kcppIcon);
 
-	renderer = SDL_CreateRenderer(window, nullptr);
+	mainRenderer = SDL_CreateRenderer(mainWindow, nullptr);
 
-	if (!renderer) {
+	if (!mainRenderer) {
 		std::cout << "STOP! renderer not init; " << SDL_GetError() << '\n';
 		std::terminate();
 	}
@@ -256,25 +260,30 @@ int main() {
 	trayQuit = SDL_InsertTrayEntryAt(trayMenu, -1, "Quit", SDL_TRAYENTRY_BUTTON);
 	SDL_SetTrayEntryCallback(trayQuit, trayQuitFunc, nullptr);
 
-
-
-	if (!SDL_SetRenderVSync(renderer, 2)) {
-		std::cout << "No adaptive vsync support\n";
-		if (!SDL_SetRenderVSync(renderer, 1)) {
-			std::cout << "No vsync support\n";
+	if (KCPP::EnableVSync) {
+		if (!SDL_SetRenderVSync(mainRenderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
+			std::cout << "No adaptive vsync support\n";
+			if (!SDL_SetRenderVSync(mainRenderer, 1)) {
+				std::cout << "No vsync support\n";
+			}
 		}
+	} else {
+		SDL_SetRenderVSync(mainRenderer, SDL_RENDERER_VSYNC_DISABLED);
 	}
 
 	KCPP::Menu::menuInit();
 
 	KCPP::Save::load();
 
+	//prestigeCounter = 1;
+	//inputCounter = 109999900000;
+
 	//inputCounter = KCPP::getNextPrestigePoint(prestigeCounter) - 10000000;
 
-	KCPP::currentStyle->init(renderer);
-	KCPP::currentStyle->resetRenderer(renderer);
+	KCPP::currentStyle->init(mainRenderer);
+	KCPP::currentStyle->resetRenderer(mainRenderer);
 
-	SDL_SetWindowHitTest(window, hitTest, nullptr);
+	SDL_SetWindowHitTest(mainWindow, hitTest, nullptr);
 	SDL_AddEventWatch(eventWatch, nullptr);
 
 	while (continueRunning) {
@@ -287,7 +296,7 @@ int main() {
 			if (event.type == SDL_EVENT_QUIT) {
 				continueRunning = false;
 			} else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
-				if (event.window.windowID == SDL_GetWindowID(window)) {
+				if (event.window.windowID == SDL_GetWindowID(mainWindow)) {
 					continueRunning = false;
 				} else {
 					toggleMenu();
@@ -296,10 +305,20 @@ int main() {
 				if (KCPP::currentStyle != nullptr) {
 					SDL_FPoint eventCoordinatesAsPoint {event.button.x, event.button.y};
 
-					if (KCPP::currentStyle->hitTest(window, &eventCoordinatesAsPoint) == KCPP::HitTestResult::Menu) {
+					switch (KCPP::currentStyle->hitTest(mainWindow, &eventCoordinatesAsPoint)) {
+					case KCPP::HitTestResult::Menu:
 						toggleMenu();
-					} else if (KCPP::currentStyle->hitTest(window, &eventCoordinatesAsPoint) == KCPP::HitTestResult::StylePassthrough) {
+						break;
+					case KCPP::HitTestResult::StylePassthrough:
 						KCPP::currentStyle->processEvent(event);
+						break;
+					case KCPP::HitTestResult::Close:
+						continueRunning = false;
+						[[fallthrough]];
+					case KCPP::HitTestResult::None:
+						[[fallthrough]];
+					default:
+						break;
 					}
 				}
 			} else {
@@ -307,7 +326,10 @@ int main() {
 			}
 		}
 
-		iterate(true);
+		if (continueRunning) {
+			KCPP::Menu::menuIterate();
+			iterate();
+		}
 	}
 
 	//SDL_Renderer *renderer = SDL_CreateRenderer();
@@ -320,9 +342,9 @@ int main() {
 
 	SDL_DestroyTray(tray);
 
-	SDL_DestroyRenderer(renderer);
+	SDL_DestroyRenderer(mainRenderer);
 	SDL_DestroySurface(kcppIcon);
-	SDL_DestroyWindow(window);
+	SDL_DestroyWindow(mainWindow);
 
 	SDL_Quit();
 

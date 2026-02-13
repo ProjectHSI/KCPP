@@ -21,6 +21,17 @@ void KCPP::Menu::menuInit() {
 
 	menuRenderer = SDL_CreateRenderer(menuWindow, nullptr);
 
+	if (KCPP::EnableVSync) {
+		if (!SDL_SetRenderVSync(menuRenderer, 2)) {
+			std::cout << "No adaptive vsync support\n";
+			if (!SDL_SetRenderVSync(menuRenderer, 1)) {
+				std::cout << "No vsync support\n";
+			}
+		}
+	} else {
+		SDL_SetRenderVSync(menuRenderer, 0);
+	}
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO &io = ImGui::GetIO();

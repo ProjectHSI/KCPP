@@ -1,14 +1,18 @@
 #include "Save.h"
+#include "WarningManagement.h"
 
 #include "InputChecker.h"
+#pragma warning( push, 1 )
+#pragma warning(disable : 4371 4365 4626 5027 4100 4946 4371 5267 5243)
 #include <KC++Save.pb.h>
+#pragma warning( pop )
 #include "KC++.h"
 #include "Styles.h"
 #include <fstream>
 
-void KCPP::Save::save() {
-	KCPP::Save::Save kcppProtoSave {};
+KCPP::Save::Save kcppProtoSave {};
 
+void KCPP::Save::save() {
 	kcppProtoSave.set_counter(KCPP::getCounter());
 	kcppProtoSave.set_prestige(KCPP::getPrestige());
 
@@ -37,16 +41,14 @@ void KCPP::Save::save() {
 }
 
 void KCPP::Save::load() {
-	KCPP::Save::Save kcppProtoSave {};
-
 	{
 		std::ifstream saveStream("kc++save.pbbin", std::ios::binary);
 		if (!kcppProtoSave.ParseFromIstream(&saveStream))
 			return;
 	}
 
-	KCPP::setCounter(kcppProtoSave.counter());
-	KCPP::setPrestige(kcppProtoSave.prestige());
+	KCPP::setCounter(static_cast < KCPP::CounterType >(kcppProtoSave.counter()));
+	KCPP::setPrestige(static_cast < KCPP::PrestigeType >(kcppProtoSave.prestige()));
 
 	KCPP::InputChecker::setInputEnabled(KCPP::InputChecker::InputType::Keyboard, kcppProtoSave.keyboardinput());
 	KCPP::InputChecker::setInputEnabled(KCPP::InputChecker::InputType::Mouse, kcppProtoSave.mouseinput());

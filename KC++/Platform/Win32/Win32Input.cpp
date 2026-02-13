@@ -48,7 +48,7 @@ LRESULT mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
 		if (lastMousePos.x != -1 && lastMousePos.y != -1) {
 			POINT distance = {abs(lParamStruct->pt.x - lastMousePos.x), abs(lParamStruct->pt.y - lastMousePos.y)};
 
-			KCPP::InputChecker::safeAddToInputCounter(inputCounters, static_cast < KCPP::CounterType >(sqrtf(distance.x * distance.x + distance.y * distance.y) * KCPP::InputChecker::mouseMotionReward));
+			KCPP::InputChecker::safeAddToInputCounter(inputCounters, static_cast < KCPP::CounterType >(sqrt(static_cast < double >(distance.x * distance.x + distance.y * distance.y)) * KCPP::InputChecker::mouseMotionReward));
 			receivedInput.test_and_set();
 		}
 
@@ -60,10 +60,10 @@ LRESULT mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
 	} else if (wParam == WM_XBUTTONUP) {
 		xButtonsPressed &= ~xButton;
 	} else if (wParam == WM_MOUSEWHEEL || wParam == WM_MOUSEHWHEEL) {
-		signed short wheelDelta = ((lParamStruct->mouseData & 0xFFFF0000) >> 16);
+		signed short wheelDelta = static_cast < signed short >((lParamStruct->mouseData & 0xFFFF0000) >> 16);
 		unsigned short unsignedWheelDelta = static_cast < unsigned short >(abs(wheelDelta)); // convert to unsigned
 
-		double wheelDeltaDouble = wheelDelta / WHEEL_DELTA;
+		double wheelDeltaDouble = static_cast < double >(unsignedWheelDelta) / WHEEL_DELTA;
 
 		KCPP::InputChecker::safeAddToInputCounter(inputCounters, static_cast < KCPP::CounterType >(trunc(wheelDeltaDouble * KCPP::InputChecker::mouseWheelReward)));
 		receivedInput.test_and_set();
@@ -133,7 +133,9 @@ void KCPP::InputChecker::setInputEnabled(InputType type, bool enabled) {
 	if (enabled) {
 		enabledInputTypes |= static_cast < uint8_t >(type);
 	} else {
-		enabledInputTypes &= ~static_cast < uint8_t >(type);
+		// tilde does unsigned -> signed
+		// so we do a double cast
+		enabledInputTypes &= static_cast < uint8_t >(~static_cast < uint8_t >(type));
 	}
 }
 

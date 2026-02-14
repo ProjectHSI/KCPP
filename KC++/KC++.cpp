@@ -21,6 +21,8 @@
 #include "Save.h"
 #include <KC++.png.h>
 
+#include <SDL3/SDL_main.h>
+
 #undef max
 #undef min
 
@@ -114,11 +116,7 @@ static void iterate() {
 	if (autoSaveCounter < SDL_GetTicks() / autoSaveInterval) {
 		autoSaveCounter = SDL_GetTicks() / autoSaveInterval;
 		KCPP::Save::save();
-	}
-
-	//inputCounter += 0.000001;
-	//inputCounter += 0.001;					   
-	
+	}			   
 
 	if (KCPP::InputChecker::checkInput()) {
 		KCPP::CounterType newCount = KCPP::InputChecker::newInputCount();
@@ -139,10 +137,6 @@ static void iterate() {
 
 		renderNeeded = true;
 	}
-
-	//inputCounter = inputCounter >= KCPP::calculateMaximumCounterAllowingForPrecision()
-		//? KCPP::calculateMaximumCounterAllowingForPrecision()
-		//: inputCounter;
 
 	if (KCPP::currentStyle != nullptr) {
 		if (KCPP::currentStyle->sizeChangeNeeded(mainWindow)) {
@@ -176,13 +170,9 @@ static void toggleMenu() {
 }
 
 static bool SDLCALL eventWatch([[maybe_unused]] void *userdata, SDL_Event *event) {
-	//std::cout << event->type << '\n';
 	if (event->type == SDL_EVENT_WINDOW_EXPOSED) {
 		iterate();
 		::KCPP::Menu::menuIterate();
-		//std::cout << "event watch iter" << '\n';
-	} else {
-		//std::cout << event->type << '\n';
 	}
 
 	return true;
@@ -210,15 +200,13 @@ static void SDLCALL trayQuitFunc([[maybe_unused]] void *userdata, [[maybe_unused
 	continueRunning = false;
 }
 
-int main() {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 #if defined(_WIN32) && defined(NDEBUG)
 	if (!FreeConsole())
 		std::cout << "FREECONSOLE " << GetLastError() << '\n';
 #endif
-
-	//std::cout << KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() << '\n';
 
 	KCPP::currentStyle = KCPP::Styles::availableStyles->begin()->second.get();
 
@@ -275,11 +263,6 @@ int main() {
 
 	KCPP::Save::load();
 
-	//prestigeCounter = 1;
-	//inputCounter = 109999900000;
-
-	//inputCounter = KCPP::getNextPrestigePoint(prestigeCounter) - 10000000;
-
 	KCPP::currentStyle->init(mainRenderer);
 	KCPP::currentStyle->resetRenderer(mainRenderer);
 
@@ -321,8 +304,6 @@ int main() {
 						break;
 					}
 				}
-			} else {
-				//std::cout << event.type << '\n';
 			}
 		}
 
@@ -331,8 +312,6 @@ int main() {
 			iterate();
 		}
 	}
-
-	//SDL_Renderer *renderer = SDL_CreateRenderer();
 
 	KCPP::InputChecker::quit();
 

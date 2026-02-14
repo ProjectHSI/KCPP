@@ -67,9 +67,6 @@ LRESULT mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
 
 		KCPP::InputChecker::safeAddToInputCounter(inputCounters, static_cast < KCPP::CounterType >(trunc(wheelDeltaDouble * KCPP::InputChecker::mouseWheelReward)));
 		receivedInput.test_and_set();
-	} else {
-		//std::cout << wParam << std::endl;
-		//std::cout << std::bitset < 32 >(lParamStruct->mouseData) << std::endl;
 	}
 
 	return CallNextHookEx(nullptr, code, wParam, lParam);
@@ -153,7 +150,6 @@ KCPP::CounterType KCPP::InputChecker::newInputCount() {
 }
 
 void KCPP::InputChecker::quit() {
-	//enabledInputTypes.store(0);
 	continueWin32Thread.clear();
 	win32InputThread.join();
 }

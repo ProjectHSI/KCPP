@@ -185,13 +185,9 @@ namespace KCPP {
 
 		nextPrestigePointProgress *= 2;
 
-		//std::cout << nextPrestigePointProgress << '\n';
-
 		int randMin = RAND_MAX - static_cast < int >(static_cast < double >(RAND_MAX) * (nextPrestigePointProgress * chanceModifier));
 
 		int randResult = rand();
-
-		//std::cout << randResult << " " << randMin << '\n';
 
 		return randResult >= randMin;
 	}
@@ -212,6 +208,4 @@ namespace KCPP {
 
 
 	constexpr bool EnableVSync = true;
-
-	//constexpr KCPP::CounterType maximumCounterAllowingForPrecision = calculateMaximumCounterAllowingForPrecision();
 }

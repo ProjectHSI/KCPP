@@ -17,6 +17,8 @@ set (CMAKE_CXX_STANDARD 23)
 
 add_compile_options("/options:strict")
 
+set (CMAKE_UNITY_BUILD ON)
+
 block(SCOPE_FOR VARIABLES)
 
 	SET(SDL_AUDIO OFF)

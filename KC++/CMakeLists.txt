@@ -18,11 +18,6 @@ target_include_directories(KC++ PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/binDir")
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_sources(KC++ PRIVATE "Platform/Win32/Win32Username.cpp")
 	target_sources(KC++ PRIVATE "Platform/Win32/Win32Input.cpp")
-
-	# while we're here
-	#if (${CMAKE_BUILD_TYPE} STREQUAL "Release" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-		#set_target_properties(KC++ PROPERTIES WIN32_EXECUTABLE YES)
-	#endif()
 else()
 	target_sources(KC++ PRIVATE "Platform/Default/DefaultUsername.cpp")
 	#target_sources(KC++ PRIVATE "Platform/Default/DefaultInput.cpp")
@@ -30,6 +25,9 @@ else()
 endif()
 
 set_property(TARGET KC++ PROPERTY CXX_STANDARD 20)
+if (DEFINED WIN32 AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	set_property(TARGET KC++ PROPERTY WIN32_EXECUTABLE YES)
+endif()
 
 target_link_libraries(KC++ PRIVATE SDL3::SDL3)
 target_link_libraries(KC++ PRIVATE protobuf::libprotobuf-lite)

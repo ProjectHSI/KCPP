@@ -28,25 +28,8 @@ namespace KCPP {
 
 		class LCDStyle : public KCPP::Style {
 		private:
-			/*std::array < float, 4 > backgroundColour {{
-				0.0f, 0.0f, 0.0f, 0.1f
-			}};
-
-			std::array < float, 4 > inactiveColour {{
-				0.0f, 0.0f, 0.0f, 0.2f
-			}};
-
-			std::array < float, 3 > activeColour {{
-				0.0f, 1.0f, 0.0f
-			}};
-
-			std::array < float, 3 > prestigeActiveColour {{
-				1.0f, 1.0f, 0.0f
-			}};*/
-
 			SDL_Surface *lcdTextureSurface = nullptr;
 			SDL_Texture *lcdTexture = nullptr;
-			//SDL_Texture *lcdTextureInvert = nullptr;
 
 			void renderGlyph(const KCPP::LCDStyle::Font::Glyph &glyph, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, std::array < float, 3 > activeColour, std::array < float, 4 > inactiveColour);
 			void renderGlyphWithChar(char character, int xOffset, int yOffset, KCPP::CounterType counter, KCPP::PrestigeType prestige, std::array < float, 3 > activeColour, std::array < float, 4 > inactiveColour);
@@ -63,19 +46,6 @@ namespace KCPP {
 
 			bool wasSettingsInitalised = false;
 			KCPP::LCDStyle::LCDStyleSave save {};
-
-			/*enum class UserNameConfiguration {
-				TechnicalName,
-				DisplayName,
-				UserChosen
-			};
-			UserNameConfiguration userNameConfiguration = UserNameConfiguration::TechnicalName;
-			std::string userName {};
-
-			::KCPP::LCDStyle::LCDElementAlignment  lcdGrabBarAlignment {};
-			::KCPP::LCDStyle::LCDElementAttachment lcdGrabBarAttachment {};
-			::KCPP::LCDStyle::LCDElementAlignment  lcdPrestigeAlignment {};
-			::KCPP::LCDStyle::LCDElementAttachment lcdPrestigeAttachment {};*/
 
 			std::array < int, 2 > getLcdTextureSize() const;
 

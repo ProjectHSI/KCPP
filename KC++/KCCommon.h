@@ -66,7 +66,7 @@ namespace KCPP {
 	static std::string calculateCounterString(KCPP::CounterType counter) {
 		std::string counterString = std::format(std::numeric_limits < KCPP::CounterType >::is_exact ? "{:{}}" : "{:.{}f}", counter, KCPP::calculateGlyphsNeededForMaximumCounter() + 1, 6);
 
-		if (KCPP::fixedPoint) {
+		if constexpr (KCPP::fixedPoint) {
 			constexpr std::size_t dotPlace = KCPP::calculateGlyphsNeededForMaximumCounter() - KCPP::fixedPoint;
 
 			for (size_t i = 0; i < dotPlace; i++) {

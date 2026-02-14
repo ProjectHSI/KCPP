@@ -1,4 +1,4 @@
-﻿# CMakeList.txt : Top-level CMake project file, do global configuration
+# CMakeList.txt : Top-level CMake project file, do global configuration
 # and include sub-projects here.
 #
 cmake_minimum_required (VERSION 3.12)
@@ -71,6 +71,8 @@ if (MSVC)
 	add_compile_options("/wd5045") # Spectre Mitigation Notification
 	add_compile_options("/wd5039") # 'extern "C"' function used with -EHc
 	add_compile_options("/wd4061") # Switch does not explictly handle enum value
+	add_compile_options("/wd4710") # Function wasn't inlined
+	add_compile_options("/wd4711") # Non-inline function was inlined
 	add_compile_options("/permissive-")
 	add_compile_options("/WX")
 	add_link_options("/WX")

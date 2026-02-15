@@ -1,7 +1,10 @@
 # CMakeList.txt : Top-level CMake project file, do global configuration
 # and include sub-projects here.
 #
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.14)
+
+include(CheckIPOSupported)
+include(CheckPIESupported)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -18,6 +21,45 @@ set (CMAKE_CXX_STANDARD 23)
 add_compile_options("/options:strict")
 
 set (CMAKE_UNITY_BUILD ON)
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	check_ipo_supported(RESULT KCPP_IPO_SUPPORTED OUTPUT KCPP_IPO_SUPPORTED_LOG LANGUAGES C CXX)
+	check_pie_supported(OUTPUT_VARIABLE KCPP_PIE_SUPPORTED_LOG LANGUAGES C CXX)
+
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${KCPP_IPO_SUPPORTED})
+	set(CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_CXX_LINK_PIE_SUPPORTED})
+
+	if (${KCPP_IPO_SUPPORTED} EQUAL FALSE)
+		message(STATUS "CMake reported this error while attempting to compile with IPO: ${KCPP_IPO_SUPPORTED_LOG}")
+	else()
+		message(STATUS "IPO was enabled for this release build.")
+	endif()
+
+	if (${CMAKE_CXX_LINK_PIE_SUPPORTED} EQUAL FALSE)
+		message(STATUS "CMake reported this error while attempting to compile with PIE: ${KCPP_PIE_SUPPORTED_LOG}")
+	else()
+		message(STATUS "PIE was enabled for this release build.")
+		if (${MSVC})
+			# bruhd forgot to actually set the options
+			add_link_options("/HIGHENTROPYVA" "/DYNAMICBASE")
+		endif()
+	endif()
+
+	if (DEFINED KCPP_LTCG_PROFILE)
+		if (NOT ${MSVC})
+			message(FATAL "Not on MSVC. LTCG Profiling is not supported.")
+		endif()
+		add_link_options("/GENPROFILE:COUNTER64,EXACT,PATH,TRACKEH")
+	endif()
+else()
+	message(STATUS "IPO/PIE was not enabled for this debug build.")
+endif()
+
+if (${MSVC} AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
+	add_compile_options("/Gw")
+	add_compile_options("/GF")
+	add_link_options("/OPT:ICF=10" "/OPT:REF")
+endif()
 
 block(SCOPE_FOR VARIABLES)
 
@@ -55,6 +97,7 @@ block(SCOPE_FOR VARIABLES)
 		set (protobuf_INSTALL NO)
 		set (protobuf_BUILD_TESTS NO)
 		set (protobuf_BUILD_LIBUPB YES)
+		set (protobuf_DISABLE_RTTI YES)
 
 		add_subdirectory ("ext/protobuf" EXCLUDE_FROM_ALL)
 		include ("ext/protobuf/cmake/protobuf-generate.cmake")

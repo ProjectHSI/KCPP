@@ -15,6 +15,8 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/binDir/KC++.png.h" "${CMA
 target_include_directories(KC++ PRIVATE SYSTEM "${CMAKE_CURRENT_BINARY_DIR}/protoOutput")
 target_include_directories(KC++ PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/binDir")
 
+target_compile_options(KC++ PRIVATE "/GR-")
+
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	target_sources(KC++ PRIVATE "Platform/Win32/Win32Username.cpp")
 	target_sources(KC++ PRIVATE "Platform/Win32/Win32Input.cpp")

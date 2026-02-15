@@ -109,6 +109,30 @@
       "inherits": [ "default", "ARM64", "release" ]
     },
     {
+      "name": "LTCG-x64-profiled",
+      "displayName": "x64 LTCG Profiled",
+      "inherits": "x64-release",
+      "cacheVariables": {
+        "KCPP_LTCG_PROFILE": "true"
+      }
+    },
+    {
+      "name": "LTCG-Win32-profiled",
+      "displayName": "Win32 LTCG Profiled",
+      "inherits": "Win32-release",
+      "cacheVariables": {
+        "KCPP_LTCG_PROFILE": "true"
+      }
+    },
+    {
+      "name": "LTCG-ARM64-profiled",
+      "displayName": "ARM64 LTCG Profiled",
+      "inherits": "ARM64-release",
+      "cacheVariables": {
+        "KCPP_LTCG_PROFILE": "true"
+      }
+    },
+    {
       "name": "x64-debug",
       "displayName": "x64 Debug",
       "inherits": [ "default", "x64", "debug" ]

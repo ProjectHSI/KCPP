@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.14)
 
 function(BIN2C fileName outputFile variableName)
 	file(READ ${fileName} fileBinary HEX)

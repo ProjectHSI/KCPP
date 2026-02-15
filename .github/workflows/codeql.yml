@@ -76,6 +76,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4
       with:
+        config-file: ".github/codeql/codeql-config.yml"
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
         queries: security-and-quality
@@ -106,7 +107,7 @@ jobs:
 
     - name: Save CMake Cache
       id: cmake-cache-save
-      uses: actions/cache/restore@v5
+      uses: actions/cache/save@v5
       with:
         path: CodeQLBuild
         key: codeql-cmake-cache
@@ -115,7 +116,6 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
-        config-file: ".github/codeql/codeql-config.yml"
         output: sarif-results
         upload: false
 

@@ -18,7 +18,6 @@ namespace KCPP {
 	constexpr std::size_t fixedPoint = 6;
 
 	constexpr KCPP::CounterType incrementCounterTypePrecise(KCPP::CounterType value) {
-		//return std::nextafter(value, std::numeric_limits < KCPP::CounterType >::max());
 		return value + counterTypePrecisionWanted;
 	}
 
@@ -88,7 +87,6 @@ namespace KCPP {
 
 		if (counterString.length() > KCPP::calculateGlyphsNeededForMaximumCounter() + 1) {
 			counterString = counterString.substr(0, KCPP::calculateGlyphsNeededForMaximumCounter() + 1);
-			//counterString += "...";
 		}
 
 		counterString = counterString.substr(counterString.find_first_not_of(' '));
@@ -157,7 +155,6 @@ namespace KCPP {
 		}
 
 		return currentGlyphsNeeded;
-		//return 10;
 	}
 	static_assert(calculateGlyphsNeededForMaximumPrestigeCounter() > 4);
 

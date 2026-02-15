@@ -35,16 +35,6 @@ namespace KCPP {
 		void clear();
 
 		inline void safeAddToInputCounter(std::atomic < KCPP::CounterType > &target, KCPP::CounterType newCount) {
-			/*KCPP::CounterType currentValue = target.load();
-
-			if (currentValue >= KCPP::calculateMaximumCounterAllowingForPrecision() - newCount) {
-				target.store(currentValue + newCount);
-				std::cout << currentValue << '\n';
-			} else {
-				target.store(KCPP::calculateMaximumCounterAllowingForPrecision());
-				std::cout << "OVR" << '\n';
-			}*/
-
 			target.fetch_add(newCount);
 		}
 	}

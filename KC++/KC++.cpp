@@ -149,7 +149,6 @@ static void iterate() {
 
 		if (renderNeeded || KCPP::currentStyle->renderNow()) {
 			KCPP::currentStyle->render(mainRenderer, inputCounter, prestigeCounter);
-			//std::cout << inputCounter << '\n';
 		}
 
 		SDL_RenderPresent(mainRenderer);

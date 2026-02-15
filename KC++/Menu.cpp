@@ -133,8 +133,6 @@ void KCPP::Menu::menuIterate() {
 		ImGui::EndPopup();
 	}
 
-	//ImGui::ShowDemoWindow();
-
 	ImGui::Render();
 
 	SDL_SetRenderScale(menuRenderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);

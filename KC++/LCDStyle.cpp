@@ -693,6 +693,14 @@ void KCPP::LCDStyle::LCDStyle::parseSettings(const std::string &data) {
 			save.mutable_prestige_active_colour()->set_r(static_cast < float >(save.prestige_active_colour_double().r()));
 			save.mutable_prestige_active_colour()->set_g(static_cast < float >(save.prestige_active_colour_double().g()));
 			save.mutable_prestige_active_colour()->set_b(static_cast < float >(save.prestige_active_colour_double().b()));
+		} else {
+			// there was never any public versioned build with a save file, but no colour data.
+			// the save file was already corrupt anyway, if this was the case.
+			// but there was a build wo/ prestige colour data (all builds prior to v1.3.0?
+			// so therefore this is a valid case.
+			save.mutable_prestige_active_colour()->set_r(1.0f);
+			save.mutable_prestige_active_colour()->set_g(1.0f);
+			save.mutable_prestige_active_colour()->set_b(0.0f);
 		}
 		if (save.has_inactive_colour_double()) {
 			save.mutable_inactive_colour()->set_r(static_cast < float >(save.inactive_colour_double().r()));

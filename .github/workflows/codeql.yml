@@ -95,7 +95,7 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - name: Run manual build steps
       shell: pwsh
-      if: matrix.build-mode == 'manual' && steps.cmake-cache-restore.output.cache-hit != 'true'
+      if: matrix.build-mode == 'manual' && steps.cmake-cache-restore.outputs.cache-hit != 'true'
       run: |
         $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
         $prevLocation = Get-Location

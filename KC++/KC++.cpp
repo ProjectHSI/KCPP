@@ -208,7 +208,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 #endif
 
 	KCPP::currentStyle = KCPP::Styles::availableStyles->begin()->second.get();
-
 	KCPP::UsernameFinder::refreshCachedUserNames();
 
 	SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1");
@@ -217,6 +216,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
 	KCPP::InputChecker::init();
 
+	// window creation
 	mainWindow = SDL_CreateWindow("KC++", 1, 1, SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_TRANSPARENT | SDL_WINDOW_UTILITY | SDL_WINDOW_BORDERLESS);
 
 	if (!mainWindow) {
@@ -225,9 +225,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 	}
 
 	kcppIcon = SDL_LoadPNG_IO(SDL_IOFromConstMem(kcppPng.data(), kcppPng.size()), true);
-
 	SDL_SetWindowIcon(mainWindow, kcppIcon);
 
+	// renderer creation
 	mainRenderer = SDL_CreateRenderer(mainWindow, nullptr);
 
 	if (!mainRenderer) {
@@ -235,8 +235,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 		std::terminate();
 	}
 
-
-
+	// tray icon creation
+	/*
+		KC++
+		| - Toggle Window
+		| - Recenter Window
+		|
+		| - Quit
+	*/
 	tray = SDL_CreateTray(kcppIcon, "KC++");
 	trayMenu = SDL_CreateTrayMenu(tray);
 	trayToggleWindow = SDL_InsertTrayEntryAt(trayMenu, -1, "Toggle Window", SDL_TRAYENTRY_BUTTON);
@@ -247,6 +253,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 	trayQuit = SDL_InsertTrayEntryAt(trayMenu, -1, "Quit", SDL_TRAYENTRY_BUTTON);
 	SDL_SetTrayEntryCallback(trayQuit, trayQuitFunc, nullptr);
 
+	// vsync
 	if (KCPP::EnableVSync) {
 		if (!SDL_SetRenderVSync(mainRenderer, SDL_RENDERER_VSYNC_ADAPTIVE)) {
 			std::cout << "No adaptive vsync support\n";
@@ -260,6 +267,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
 	KCPP::Menu::menuInit();
 
+	// sensible default if not set by load
 	SDL_SetWindowPosition(mainWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 
 	KCPP::Save::load();
@@ -267,6 +275,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 	KCPP::currentStyle->init(mainRenderer);
 	KCPP::currentStyle->resetRenderer(mainRenderer);
 
+	// window exposed event watch
 	SDL_SetWindowHitTest(mainWindow, hitTest, nullptr);
 	SDL_AddEventWatch(eventWatch, nullptr);
 

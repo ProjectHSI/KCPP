@@ -545,6 +545,7 @@ static bool lcdElementAttachmentOption(const char *label, KCPP::LCDStyle::LCDEle
 void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 	bool edited = false;
 
+	// colours
 	bool bgColourEdited = false;
 	bool inactiveColourEdited = false;
 	bool activeColourEdited = false;
@@ -582,6 +583,7 @@ void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 
 	ImGui::SeparatorText("Fast Quit");
 
+	// fast quit
 	bool fastQuitEdited;
 	bool fastQuit = save.fast_quit();
 	edited |= fastQuitEdited = ImGui::Checkbox("Fast Quit", &fastQuit);
@@ -590,6 +592,7 @@ void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 
 	ImGui::SeparatorText("Introduction");
 
+	// user name
 	std::string userName = "";
 	if (save.has_user_name_policy()) {
 		switch (save.user_name_policy()) {
@@ -618,6 +621,7 @@ void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 	}
 	ImGui::EndDisabled();
 
+	// user name warning
 	for (const auto character : userName) {
 		if (!KCPP::LCDStyle::Font::glyphs.contains(character)) {
 			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Some characters will be displayed as a stylised cross.");
@@ -654,6 +658,7 @@ void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 
 	ImGui::SeparatorText("Elements");
 
+	// lcd element alignment
 	bool grabBarAlignmentEdited = false;
 	bool grabBarAttachmentEdited = false;
 	bool prestigeCounterAlignmentEdited = false;

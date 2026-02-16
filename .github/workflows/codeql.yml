@@ -96,13 +96,22 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - name: Run manual build steps
       shell: pwsh
-      if: matrix.build-mode == 'manual'
+      if: matrix.build-mode == 'manual' && steps.cmake-cache-restore.output.cache-hit != 'true'
       run: |
         $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
         $prevLocation = Get-Location
         & "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64
         cd $prevLocation
         cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe" "-DCMAKE_UNITY_BUILD=ON"
+
+    - name: Run manual build steps
+      shell: pwsh
+      if: matrix.build-mode == 'manual'
+      run: |
+        $vsPath = C:\"Program Files (x86)"\"Microsoft Visual Studio"\Installer\vswhere.exe -latest -products * -property installationPath
+        $prevLocation = Get-Location
+        & "$vsPath\Common7\Tools\Launch-VsDevShell.ps1" -Arch amd64
+        cd $prevLocation
         cmake --build CodeQLBuild -j
 
     - name: Save CMake Cache

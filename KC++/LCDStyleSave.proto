@@ -48,7 +48,7 @@ message LCDColour4Double {
 
 message LCDStyleSave {
 	LCDColour3 active_colour = 11;
-	LCDColour3 prestige_active_colour = 12;
+	optional LCDColour3 prestige_active_colour = 12;
 	LCDColour4 inactive_colour = 13;
 	LCDColour4 bg_colour = 14;
 

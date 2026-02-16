@@ -547,7 +547,6 @@ void KCPP::LCDStyle::LCDStyle::imGuiSettingsMenu() {
 	bool inactiveColourEdited = false;
 	bool activeColourEdited = false;
 	bool prestigeColourEdited = false;
-	// FIXME: feels inefficient, optimise?
 	auto backgroundColour = getContigousLcdColour4(save.bg_colour());
 	auto inactiveColour = getContigousLcdColour4(save.inactive_colour());
 	auto activeColour = getContigousLcdColour3(save.active_colour());

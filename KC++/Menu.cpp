@@ -53,7 +53,14 @@ void KCPP::Menu::openMenu() {
 }
 
 bool KCPP::Menu::menuEvent(SDL_Event &event) {
-	return !ImGui_ImplSDL3_ProcessEvent(&event);
+	if (!ImGui_ImplSDL3_ProcessEvent(&event)) {
+		if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(menuWindow)) {
+			KCPP::Menu::closeMenu();
+			return false;
+		}
+		return true;
+	} else
+		return false;
 }
 
 void KCPP::Menu::menuIterate() {

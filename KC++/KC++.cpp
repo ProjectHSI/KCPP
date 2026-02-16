@@ -291,8 +291,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 			} else if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
 				if (event.window.windowID == SDL_GetWindowID(mainWindow)) {
 					continueRunning = false;
-				} else {
-					toggleMenu();
 				}
 			} else if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) {
 				if (KCPP::currentStyle != nullptr) {

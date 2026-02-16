@@ -64,5 +64,5 @@ void KCPP::Save::load() {
 	}
 
 	if (kcppProtoSave.has_window_x() && kcppProtoSave.has_window_y())
-	KCPP::setWindowPosition({kcppProtoSave.window_x(), kcppProtoSave.window_y()});
+		KCPP::setWindowPosition({kcppProtoSave.window_x(), kcppProtoSave.window_y()});
 }

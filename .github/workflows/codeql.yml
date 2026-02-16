@@ -93,7 +93,7 @@ jobs:
     # to build your code.
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-    - name: Run manual build steps
+    - name: Generate CMake Cache
       shell: pwsh
       if: matrix.build-mode == 'manual' && steps.cmake-cache-restore.outputs.cache-hit != 'true'
       run: |
@@ -103,7 +103,7 @@ jobs:
         cd $prevLocation
         cmake -B CodeQLBuild --preset x64-release . "-DCMAKE_C_COMPILER=cl.exe" "-DCMAKE_CXX_COMPILER=cl.exe" "-DCMAKE_UNITY_BUILD=ON"
 
-    - name: Run manual build steps
+    - name: Build
       shell: pwsh
       if: matrix.build-mode == 'manual'
       run: |

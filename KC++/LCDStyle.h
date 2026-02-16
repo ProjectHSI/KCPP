@@ -56,6 +56,8 @@ namespace KCPP {
 
 			void addIntroTickerAnimation();
 
+			void initSave();
+
 		public:
 			virtual std::string_view getInternalName() override;
 			virtual std::string_view getDisplayName() override;
@@ -65,7 +67,7 @@ namespace KCPP {
 			virtual void prestige() override;
 
 
-
+			// Render
 			LCDStyle();
 
 			virtual KCPP::HitTestResult hitTest(SDL_Window *window, const SDL_FPoint *cursorPos);

@@ -41,9 +41,7 @@ void KCPP::LCDStyle::LCDStyle::prestige() {
 }
 
 
-
-
-KCPP::LCDStyle::LCDStyle::LCDStyle() : KCPP::Style() {
+void KCPP::LCDStyle::LCDStyle::initSave() {
 	save.mutable_active_colour()->set_r(0.0f);
 	save.mutable_active_colour()->set_g(1.0f);
 	save.mutable_active_colour()->set_b(0.0f);
@@ -63,6 +61,10 @@ KCPP::LCDStyle::LCDStyle::LCDStyle() : KCPP::Style() {
 	save.mutable_bg_colour()->set_a(0.1f);
 
 	save.set_user_name_policy(LCDUserNameType::UserName);
+}
+
+KCPP::LCDStyle::LCDStyle::LCDStyle() : KCPP::Style() {
+	initSave();
 }
 
 KCPP::HitTestResult KCPP::LCDStyle::LCDStyle::hitTest(SDL_Window *hitTestWindow, const SDL_FPoint *cursorPos) {

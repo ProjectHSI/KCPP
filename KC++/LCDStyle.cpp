@@ -45,7 +45,7 @@ void KCPP::LCDStyle::LCDStyle::initSave() {
 	save.mutable_active_colour()->set_r(0.0f);
 	save.mutable_active_colour()->set_g(1.0f);
 	save.mutable_active_colour()->set_b(0.0f);
-	
+
 	save.mutable_prestige_active_colour()->set_r(1.0f);
 	save.mutable_prestige_active_colour()->set_g(1.0f);
 	save.mutable_prestige_active_colour()->set_b(0.0f);
@@ -54,7 +54,7 @@ void KCPP::LCDStyle::LCDStyle::initSave() {
 	save.mutable_inactive_colour()->set_g(0.0f);
 	save.mutable_inactive_colour()->set_b(0.0f);
 	save.mutable_inactive_colour()->set_a(0.2f);
-	
+
 	save.mutable_bg_colour()->set_r(0.0f);
 	save.mutable_bg_colour()->set_g(0.0f);
 	save.mutable_bg_colour()->set_b(0.0f);

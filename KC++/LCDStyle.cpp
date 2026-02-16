@@ -157,8 +157,7 @@ void KCPP::LCDStyle::LCDStyle::addIntroTickerAnimation(void) {
 }
 
 static constexpr std::size_t getGlyphsNeeded() {
-	//return 50;
-	return KCPP::calculateGlyphsNeededForMaximumCounter() + KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() + 2 - 1/* for menu */;
+	return KCPP::calculateGlyphsNeededForMaximumCounter() + KCPP::calculateGlyphsNeededForMaximumPrestigeCounter() + 2 - 1 /* for menu */;
 }
 
 static constexpr std::size_t glyphsNeeded = getGlyphsNeeded();

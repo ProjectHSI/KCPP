@@ -260,6 +260,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv) {
 
 	KCPP::Menu::menuInit();
 
+	SDL_SetWindowPosition(mainWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
 	KCPP::Save::load();
 
 	KCPP::currentStyle->init(mainRenderer);

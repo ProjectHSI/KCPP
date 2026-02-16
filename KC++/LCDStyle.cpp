@@ -465,14 +465,17 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	if (save.fast_quit()) {
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
 
-		const auto windowSize = getSize(SDL_GetRenderWindow(renderer));
+		int w;
+		int h;
+		
+		SDL_GetRenderOutputSize(renderer, &w, &h);
 		const auto windowScale = SDL_GetWindowDisplayScale(SDL_GetRenderWindow(renderer));
 
 		std::array < SDL_FPoint, 4 > closePoints {{
-			{ static_cast < float >(windowSize[0] - 1),                                                             0 },
-			{ static_cast < float >(windowSize[0] - 1 - (PixelSize - 1)) * windowScale, (PixelSize - 1) * windowScale },
-			{ static_cast < float >(windowSize[0] - 1 - (PixelSize - 1)) * windowScale, 0                             },
-			{ static_cast < float >(windowSize[0] - 1),                                 (PixelSize - 1) * windowScale }
+			{ static_cast < float >(w - 1),                                                        0 },
+			{ static_cast < float >(w - 1) - (static_cast < float >(PixelSize - 1) * windowScale), (PixelSize - 1) * windowScale },
+			{ static_cast < float >(w - 1) - (static_cast < float >(PixelSize - 1) * windowScale), 0                             },
+			{ static_cast < float >(w - 1),                                                        (PixelSize - 1) * windowScale }
 		}};
 
 		SDL_RenderLine(renderer, closePoints[0].x, closePoints[0].y, closePoints[1].x, closePoints[1].y);

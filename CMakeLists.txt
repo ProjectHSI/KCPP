@@ -39,7 +39,10 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
 		message(STATUS "PIE was enabled for this release build.")
 		if (${MSVC})
 			# bruhd forgot to actually set the options
-			add_link_options("/HIGHENTROPYVA" "/DYNAMICBASE")
+			if(${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "x64" OR ${CMAKE_CXX_COMPILER_ARCHITECTURE_ID} STREQUAL "ARM64")
+				add_link_options("/HIGHENTROPYVA")
+			endif()
+			add_link_options("/DYNAMICBASE")
 		endif()
 	endif()
 
@@ -53,10 +56,15 @@ else()
 	message(STATUS "IPO/PIE was not enabled for this debug build.")
 endif()
 
-if (${MSVC} AND ${CMAKE_BUILD_TYPE} STREQUAL "Release")
-	add_compile_options("/Gw")
-	add_compile_options("/GF")
-	add_link_options("/OPT:ICF=10" "/OPT:REF")
+if (${MSVC})
+	if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+		add_compile_options("/Gw")
+		add_compile_options("/GF")
+		add_compile_options("/Oy")
+		add_compile_options("/Oi")
+
+		add_link_options("/OPT:ICF=10" "/OPT:REF")
+	endif()
 endif()
 
 block(SCOPE_FOR VARIABLES)
@@ -96,8 +104,12 @@ block(SCOPE_FOR VARIABLES)
 		set (protobuf_BUILD_TESTS NO)
 		set (protobuf_BUILD_LIBUPB YES)
 		set (protobuf_DISABLE_RTTI YES)
+		if (DEFINED KCPP_PROTOC)
+			set (protobuf_BUILD_PROTOC_BINARIES NO)
+		endif ()
 
 		add_subdirectory ("ext/protobuf" EXCLUDE_FROM_ALL)
+
 		include ("ext/protobuf/cmake/protobuf-generate.cmake")
 
 	endblock()
@@ -109,13 +121,14 @@ if (MSVC)
 	# Disable some useless warnings.
 	# Split onto seperate lines for better commenting.
 	add_compile_options("/wd4514") # Unreferenced Inline Function
-	add_compile_options("/wd4464") # Relative Include Path containing ".."
+	add_compile_options("/wd4464") # Relative Include Path contain ing ".."
 	add_compile_options("/wd4820") # Padding
 	add_compile_options("/wd5045") # Spectre Mitigation Notification
 	add_compile_options("/wd5039") # 'extern "C"' function used with -EHc
 	add_compile_options("/wd4061") # Switch does not explictly handle enum value
 	add_compile_options("/wd4710") # Function wasn't inlined
 	add_compile_options("/wd4711") # Non-inline function was inlined
+	add_compile_options("/wd4738") # Storing 32-bit float result in memory, possible loss of performance.
 	add_compile_options("/permissive-")
 	add_compile_options("/WX")
 	add_link_options("/WX")

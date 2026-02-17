@@ -18,7 +18,7 @@ namespace KCPP {
 		struct Touch {
 			float x {};
 			float y {};
-			std::size_t timeStamp {};
+			Uint64 timeStamp {};
 		};
 
 		enum class TextAlignment {
@@ -38,7 +38,7 @@ namespace KCPP {
 
 			struct TickerAnimation {
 				std::string text {};
-				std::size_t startTime {};
+				Uint64 startTime {};
 			};
 
 			std::deque < TickerAnimation > queuedTickerAnimations {};

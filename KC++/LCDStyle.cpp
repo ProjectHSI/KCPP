@@ -364,7 +364,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 			queuedTickerAnimations.front().startTime = SDL_GetTicks();
 		}
 
-		std::size_t phase = (SDL_GetTicks() - queuedTickerAnimations.front().startTime) / tickerTimer;
+		Uint64 phase = (SDL_GetTicks() - queuedTickerAnimations.front().startTime) / tickerTimer;
 
 		prestigeString = "";
 		counterString = "";
@@ -384,10 +384,10 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 			if (lcdStringPosition < 0)
 			#pragma warning(push)
 			#pragma warning(disable : 4365, justification : "\"-\" will never actually result in a negative number, so we can safely use it in an unsigned integer.")
-				viewableString = viewableString.substr(-lcdStringPosition, counterGlyphs);
+				viewableString = viewableString.substr(static_cast < std::string::size_type >(-lcdStringPosition), counterGlyphs);
 			#pragma warning(pop)
 			else {
-				outputIterator += lcdStringPosition;
+				outputIterator += static_cast < std::string::difference_type >(lcdStringPosition);
 			}
 
 			std::copy(viewableString.cbegin(), viewableString.cend(), outputIterator);
@@ -407,7 +407,7 @@ void KCPP::LCDStyle::LCDStyle::render(SDL_Renderer *renderer, KCPP::CounterType 
 	renderGlyphs(prestigeString, prestigeOffset, 1, count, prestige, prestigeActiveColour, inactiveColour, prestigeCounterMaxLength, prestigeTextAlignment);
 
 	// add touches
-	const ::std::size_t currentTouchTick = SDL_GetTicks();
+	const Uint64 currentTouchTick = SDL_GetTicks();
 
 	while (!currentTouches.empty()) {
 		if (currentTouches.front().timeStamp + touchDuration < currentTouchTick) {

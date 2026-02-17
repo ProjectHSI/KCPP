@@ -52,7 +52,8 @@
       "architecture": {
         "value": "ARM",
         "strategy": "external"
-      }
+      },
+      "condition": false
     },
     {
       "name": "ARM64",
@@ -95,7 +96,7 @@
     },
     {
       "name": "Win32-release",
-      "displayName": "Win32 Debug",
+      "displayName": "Win32 Release",
       "inherits": [ "default", "Win32", "release" ]
     },
     {

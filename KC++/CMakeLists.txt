@@ -6,7 +6,7 @@ include("${CMAKE_SOURCE_DIR}/BIN2CGen.cmake")
 
 add_executable (KC++ "KC++.cpp" "KC++.h" "Style.h" "LCDStyle.h" "LCDStyle.cpp" "InputChecker.h" "LCDFont.h" "KCCommon.h" "KCCommon.cpp" "KCBuild.h" "Menu.h" "Menu.cpp" "KC++Save.proto" "LCDStyleSave.proto" "UsernameFinder.h" "Styles.h" "Styles.cpp" "UsernameFinder.cpp" "Save.h" "Save.cpp" "${CMAKE_CURRENT_BINARY_DIR}/binOut/KC++.png.h" "WarningManagement.h")
 
-protobuf_generate(TARGET KC++ LANGUAGE cpp PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/protoOutput" IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" OUT_VAR KCPP_GENERATED_PROTOBUF_FILES)
+protobuf_generate(TARGET KC++ LANGUAGE cpp PROTOC_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/protoOutput" IMPORT_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" OUT_VAR KCPP_GENERATED_PROTOBUF_FILES PROTOC_EXE "${KCPP_PROTOC}")
 
 foreach(KCPP_GENERATED_PROTOBUF_FILE ${KCPP_GENERATED_PROTOBUF_FILES})
 	set_source_files_properties("${KCPP_GENERATED_PROTOBUF_FILE}" PROPERTIES COMPILE_OPTIONS "/w;/wd4371")

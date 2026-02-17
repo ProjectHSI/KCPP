@@ -20,7 +20,7 @@ std::unordered_set < DWORD > pressedKeys {};
 
 #define LL_HOOKS
 
-LRESULT kbHookProc(int code, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK kbHookProc(int code, WPARAM wParam, LPARAM lParam) {
 	PKBDLLHOOKSTRUCT lParamStruct = reinterpret_cast < PKBDLLHOOKSTRUCT >(lParam);
 
 	if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) && !pressedKeys.contains(lParamStruct->scanCode)) {
@@ -38,7 +38,7 @@ LRESULT kbHookProc(int code, WPARAM wParam, LPARAM lParam) {
 POINT lastMousePos = {-1, -1};
 unsigned short xButtonsPressed = 0;
 
-LRESULT mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK mouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
 	PMSLLHOOKSTRUCT lParamStruct = reinterpret_cast < PMSLLHOOKSTRUCT >(lParam);
 
 	if (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN || wParam == WM_MBUTTONDOWN) {

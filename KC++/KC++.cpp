@@ -62,8 +62,8 @@ SDL_TrayEntry *trayRecenterWindow;
 SDL_TrayEntry *traySeparator;
 SDL_TrayEntry *trayQuit;
 
-::std::size_t autoSaveCounter {};
-::std::size_t autoSaveInterval = 60 * 1000; // 1 minute
+Uint64 autoSaveCounter {};
+Uint64 autoSaveInterval = 60 * 1000; // 1 minute
 
 KCPP::CounterType inputCounter = 0;
 bool renderNeeded = true;
